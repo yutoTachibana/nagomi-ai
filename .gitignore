@@ -35,7 +35,6 @@ supabase/seed.sql
 
 # test results
 test-results/
-screenshots/
 playwright-report/
 
 # cookies (test artifacts)
