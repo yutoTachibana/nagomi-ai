@@ -6,6 +6,7 @@ import { eq, and, asc } from 'drizzle-orm';
 import { getAnthropic, getModel } from '@/lib/claude/client';
 import { KOTONE_SYSTEM_PROMPT } from '@/lib/claude/system-prompts';
 import { checkCrisis, getCrisisPrompt } from '@/lib/safety/crisis-detector';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,13 @@ function sseChunk(controller: ReadableStreamDefaultController, payload: unknown)
 }
 
 export async function POST(req: Request) {
+  // ----- レート制限 (30 回/時) -----
+  const ip = getClientIp(req);
+  const rl = checkRateLimit(`kotone:${ip}`, 30, 60 * 60 * 1000);
+  if (!rl.allowed) {
+    return new Response(JSON.stringify({ message: '少し休憩してから、また話しかけてください。' }), { status: 429 });
+  }
+
   const session = await auth();
   if (!session?.user?.id) {
     return new Response(JSON.stringify({ message: '認証が必要です' }), { status: 401 });

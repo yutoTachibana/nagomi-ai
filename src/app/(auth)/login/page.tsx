@@ -18,6 +18,9 @@ export default function LoginPage() {
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
+  const verified = params.get('verified') === 'true';
+  const tokenError = params.get('error') === 'invalid-token';
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -42,6 +45,18 @@ export default function LoginPage() {
           おかえりなさい
         </p>
       </div>
+
+      {verified ? (
+        <p role="status" className="rounded-xl bg-sage/10 px-4 py-3 text-center text-small text-sage">
+          メールアドレスが確認されました。ログインしてください。
+        </p>
+      ) : null}
+
+      {tokenError ? (
+        <p role="alert" className="rounded-xl bg-error/10 px-4 py-3 text-center text-small text-error">
+          リンクが無効か期限切れです。もう一度お試しください。
+        </p>
+      ) : null}
 
       <Card warm>
         <form onSubmit={onSubmit} className="space-y-4">
@@ -69,6 +84,11 @@ export default function LoginPage() {
           <Button type="submit" loading={busy} className="w-full" size="lg">
             ログイン
           </Button>
+          <p className="text-center">
+            <Link href="/forgot-password" className="text-small text-muted underline">
+              パスワードを忘れた方
+            </Link>
+          </p>
         </form>
       </Card>
 

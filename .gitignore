@@ -40,6 +40,9 @@ playwright-report/
 # cookies (test artifacts)
 cookies.txt
 
+# backups
+backups/
+
 # editors
 .vscode/
 .idea/

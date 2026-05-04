@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   title: 'こもれび',
   description: '木漏れ日のような、長期伴走型メンタルケアアプリ',
   applicationName: 'こもれび',
+  manifest: '/manifest.json',
+  icons: { icon: '/favicon.svg' },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -28,6 +30,11 @@ export const metadata: Metadata = {
   },
   formatDetection: {
     telephone: false,
+  },
+  openGraph: {
+    title: 'こもれび',
+    description: '木漏れ日のような、長期伴走型メンタルケアアプリ',
+    type: 'website',
   },
 };
 

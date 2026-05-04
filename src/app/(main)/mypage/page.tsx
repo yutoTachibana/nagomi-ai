@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { Settings, Pill, Stethoscope, Bell, Lock, FileText, LogOut } from 'lucide-react';
+import { Settings, Pill, Stethoscope, Bell, Lock, FileText, LogOut, Shield } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { profiles } from '@/lib/db/schema';
+import { profiles, users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 export default async function MyPage() {
@@ -12,6 +12,12 @@ export default async function MyPage() {
     .select({ displayName: profiles.displayName })
     .from(profiles)
     .where(eq(profiles.id, session!.user.id))
+    .limit(1);
+
+  const [userData] = await db
+    .select({ role: users.role })
+    .from(users)
+    .where(eq(users.id, session!.user.id))
     .limit(1);
 
   return (
@@ -31,6 +37,14 @@ export default async function MyPage() {
           <MyPageItem href="/mypage/settings" Icon={Settings} label="設定" hint="表示やテーマ" />
         </ul>
       </Card>
+
+      {userData?.role === 'admin' && (
+        <Card>
+          <ul>
+            <MyPageItem href="/admin" Icon={Shield} label="モデレーション" hint="投稿の審査" />
+          </ul>
+        </Card>
+      )}
 
       <Card>
         <form action="/api/auth/logout" method="post">

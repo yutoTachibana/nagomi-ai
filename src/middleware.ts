@@ -1,15 +1,16 @@
 import { auth } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
-const PUBLIC_PATHS = ['/login', '/signup'];
+const PUBLIC_PATHS = ['/login', '/signup', '/terms', '/privacy'];
 
 export default auth((req) => {
   const path = req.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
   const isCrisis = path.startsWith('/crisis');
   const isAuthApi = path.startsWith('/api/auth');
+  const isHealth = path.startsWith('/api/health');
 
-  if (isCrisis || isAuthApi) return NextResponse.next();
+  if (isCrisis || isAuthApi || isHealth) return NextResponse.next();
 
   if (!req.auth && !isPublic) {
     // API ルートは JSON 401 を返す
