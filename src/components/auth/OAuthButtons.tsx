@@ -1,10 +1,28 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+interface ProviderInfo {
+  id: string;
+  name: string;
+}
 
 export function OAuthButtons() {
   const [loading, setLoading] = useState<string | null>(null);
+  const [providers, setProviders] = useState<ProviderInfo[]>([]);
+
+  useEffect(() => {
+    fetch('/api/auth/providers')
+      .then((r) => r.json())
+      .then((data) => {
+        const list = Object.values(data) as ProviderInfo[];
+        setProviders(list.filter((p) => p.id !== 'credentials'));
+      })
+      .catch(() => {});
+  }, []);
+
+  if (providers.length === 0) return null;
 
   async function handleOAuth(provider: string) {
     setLoading(provider);
@@ -12,34 +30,38 @@ export function OAuthButtons() {
   }
 
   return (
-    <div className="space-y-3">
-      <button
-        onClick={() => handleOAuth('google')}
-        disabled={loading !== null}
-        className="flex w-full items-center justify-center gap-3 rounded-pill border border-ink/10 bg-white px-6 py-3 text-body text-ink transition-colors hover:bg-accent-soft/30 disabled:opacity-50 min-h-[48px]"
-      >
-        {loading === 'google' ? (
-          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-        ) : (
-          <GoogleIcon />
-        )}
-        Google でログイン
-      </button>
+    <>
+      <div className="space-y-3">
+        {providers.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => handleOAuth(p.id)}
+            disabled={loading !== null}
+            className="flex w-full items-center justify-center gap-3 rounded-pill border border-ink/10 bg-white px-6 py-3 text-body text-ink transition-colors hover:bg-accent-soft/30 disabled:opacity-50 min-h-[48px]"
+          >
+            {loading === p.id ? (
+              <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            ) : (
+              <ProviderIcon id={p.id} />
+            )}
+            {p.name} でログイン
+          </button>
+        ))}
+      </div>
 
-      <button
-        onClick={() => handleOAuth('twitter')}
-        disabled={loading !== null}
-        className="flex w-full items-center justify-center gap-3 rounded-pill border border-ink/10 bg-white px-6 py-3 text-body text-ink transition-colors hover:bg-accent-soft/30 disabled:opacity-50 min-h-[48px]"
-      >
-        {loading === 'twitter' ? (
-          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-        ) : (
-          <XIcon />
-        )}
-        X でログイン
-      </button>
-    </div>
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-accent-soft" />
+        <span className="text-kana text-muted">または</span>
+        <div className="h-px flex-1 bg-accent-soft" />
+      </div>
+    </>
   );
+}
+
+function ProviderIcon({ id }: { id: string }) {
+  if (id === 'google') return <GoogleIcon />;
+  if (id === 'twitter') return <XIcon />;
+  return null;
 }
 
 function GoogleIcon() {

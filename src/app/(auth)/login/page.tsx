@@ -61,12 +61,6 @@ export default function LoginPage() {
 
       <OAuthButtons />
 
-      <div className="flex items-center gap-3">
-        <div className="h-px flex-1 bg-accent-soft" />
-        <span className="text-kana text-muted">または</span>
-        <div className="h-px flex-1 bg-accent-soft" />
-      </div>
-
       <Card warm>
         <form onSubmit={onSubmit} className="space-y-4">
           <Input
