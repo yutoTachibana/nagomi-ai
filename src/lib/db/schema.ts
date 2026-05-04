@@ -18,9 +18,13 @@ import { sql } from 'drizzle-orm';
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: text('email').notNull().unique(),
-  passwordHash: text('password_hash').notNull(),
+  passwordHash: text('password_hash'), // nullable: OAuth ユーザーはパスワードなし
   emailVerified: boolean('email_verified').notNull().default(false),
   role: text('role').notNull().default('user'), // 'user' | 'admin'
+  // OAuth プロバイダー情報
+  oauthProvider: text('oauth_provider'), // 'google' | 'twitter' | null
+  oauthProviderId: text('oauth_provider_id'), // プロバイダー側の ID
+  avatarUrl: text('avatar_url'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

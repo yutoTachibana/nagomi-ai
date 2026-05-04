@@ -7,6 +7,7 @@ import { signIn } from 'next-auth/react';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { OAuthButtons } from '@/components/auth/OAuthButtons';
 import { generateMasterKey, storeMasterKey, ENCRYPTION_ENABLED } from '@/lib/crypto';
 
 export default function SignupPage() {
@@ -61,6 +62,14 @@ export default function SignupPage() {
         <p className="mt-2 text-small text-muted">
           長く、ゆっくりと
         </p>
+      </div>
+
+      <OAuthButtons />
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-accent-soft" />
+        <span className="text-kana text-muted">または</span>
+        <div className="h-px flex-1 bg-accent-soft" />
       </div>
 
       <Card warm>

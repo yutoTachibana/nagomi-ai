@@ -7,6 +7,7 @@ import { signIn } from 'next-auth/react';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import { OAuthButtons } from '@/components/auth/OAuthButtons';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -57,6 +58,14 @@ export default function LoginPage() {
           リンクが無効か期限切れです。もう一度お試しください。
         </p>
       ) : null}
+
+      <OAuthButtons />
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-accent-soft" />
+        <span className="text-kana text-muted">または</span>
+        <div className="h-px flex-1 bg-accent-soft" />
+      </div>
 
       <Card warm>
         <form onSubmit={onSubmit} className="space-y-4">
