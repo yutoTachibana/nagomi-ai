@@ -11,3 +11,4 @@ certificates
 e2e
 *.md
 !README.md
+infra/
