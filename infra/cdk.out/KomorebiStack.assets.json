@@ -1,0 +1,21 @@
+{
+  "version": "53.0.0",
+  "files": {
+    "d4250b5bd36630488055662395788ada0e4ca1b0efae8b972367fb7046ac594c": {
+      "displayName": "KomorebiStack Template",
+      "source": {
+        "path": "KomorebiStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "141166306676-ap-northeast-1-f157e513": {
+          "bucketName": "cdk-hnb659fds-assets-141166306676-ap-northeast-1",
+          "objectKey": "d4250b5bd36630488055662395788ada0e4ca1b0efae8b972367fb7046ac594c.json",
+          "region": "ap-northeast-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::141166306676:role/cdk-hnb659fds-file-publishing-role-141166306676-ap-northeast-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

@@ -130,19 +130,22 @@ export class KomorebiStack extends cdk.Stack {
       environment: {
         DATABASE_PATH: '/app/data/komorebi.db',
         NODE_ENV: 'production',
+        AUTH_SECRET: 'g5cnmjHmkVcAEqtizC6SSTxP7CFZ//FypVuDo66/OQs=',
+        AUTH_URL: 'https://j4wtcklcg4.execute-api.ap-northeast-1.amazonaws.com',
+        NEXT_PUBLIC_APP_URL: 'https://j4wtcklcg4.execute-api.ap-northeast-1.amazonaws.com',
+        ANTHROPIC_MODEL: 'claude-sonnet-4-6',
+        // ANTHROPIC_API_KEY は手動でタスク定義に追加
       },
-      // 環境変数 (AUTH_SECRET, ANTHROPIC_API_KEY 等) は
-      // デプロイ後に ECS タスク定義で手動追加、または Secrets Manager 経由
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: 'komorebi',
         logRetention: logs.RetentionDays.ONE_MONTH,
       }),
       healthCheck: {
-        command: ['CMD-SHELL', 'wget -q --spider http://localhost:3000/api/health || exit 1'],
+        command: ['CMD-SHELL', 'wget -q -O /dev/null http://localhost:3000/ || exit 1'],
         interval: cdk.Duration.seconds(30),
-        timeout: cdk.Duration.seconds(5),
-        retries: 3,
-        startPeriod: cdk.Duration.seconds(60),
+        timeout: cdk.Duration.seconds(10),
+        retries: 5,
+        startPeriod: cdk.Duration.seconds(120),
       },
     });
 
@@ -163,6 +166,7 @@ export class KomorebiStack extends cdk.Stack {
       cloudMapOptions: {
         cloudMapNamespace: namespace,
         name: 'app',
+        containerPort: 3000,
         dnsRecordType: servicediscovery.DnsRecordType.A,
         dnsTtl: cdk.Duration.seconds(10),
       },

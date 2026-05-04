@@ -50,4 +50,4 @@ backups/
 certificates
 
 # SQLite database
-data/
+data/infra/cdk.out/

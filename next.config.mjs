@@ -4,7 +4,7 @@ const require = createRequire(import.meta.url);
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  // output: 'standalone', // ECS 用に無効化 (better-sqlite3 のネイティブモジュール問題)
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
