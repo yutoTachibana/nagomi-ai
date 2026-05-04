@@ -4,7 +4,7 @@
   "private": true,
   "description": "木漏れ日のような長期伴走型メンタルケアアプリ",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --experimental-https",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
