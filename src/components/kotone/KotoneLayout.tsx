@@ -58,10 +58,23 @@ export function KotoneLayout({ conversations: initialConversations }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function handleSelectConversation(id: string) {
+  async function handleSelectConversation(id: string) {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/kotone/messages?conversation_id=${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setLoadedMessages(data.messages ?? []);
+      } else {
+        setLoadedMessages([]);
+      }
+    } catch {
+      setLoadedMessages([]);
+    } finally {
+      setLoading(false);
+    }
     setSelectedId(id);
     setShowList(false);
-    loadMessages(id);
   }
 
   function handleNewConversation() {
