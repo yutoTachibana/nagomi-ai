@@ -89,6 +89,12 @@ export async function POST(req: Request) {
     crisisFlagged: crisis.flagged,
   });
 
+  // ----- 新規会話の場合、最初のメッセージからタイトルを生成 -----
+  if (!conversation_id) {
+    const title = message.length > 30 ? message.slice(0, 30) + '...' : message;
+    await db.update(conversations).set({ title }).where(eq(conversations.id, convId!));
+  }
+
   if (crisis.flagged) {
     await db.update(conversations)
       .set({ everCrisisFlagged: true })

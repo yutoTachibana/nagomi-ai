@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Send, AlertCircle } from 'lucide-react';
+import { Send, AlertCircle, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -16,9 +16,12 @@ interface Message {
 interface Props {
   conversationId?: string;
   initialMessages?: Message[];
+  onConversationCreated?: (id: string, title: string) => void;
+  onShowList?: () => void;
+  loading?: boolean;
 }
 
-export function Chat({ conversationId: initialConvId, initialMessages = [] }: Props) {
+export function Chat({ conversationId: initialConvId, initialMessages = [], onConversationCreated, onShowList, loading }: Props) {
   const [messages, setMessages] = React.useState<Message[]>(initialMessages);
   const [input, setInput] = React.useState('');
   const [streaming, setStreaming] = React.useState(false);
@@ -95,6 +98,10 @@ export function Chat({ conversationId: initialConvId, initialMessages = [] }: Pr
 
             if (parsed.type === 'meta') {
               setConversationId(parsed.conversation_id);
+              // 新規会話作成時に親コンポーネントへ通知
+              if (!initialConvId && onConversationCreated) {
+                onConversationCreated(parsed.conversation_id, text);
+              }
             } else if (parsed.type === 'chunk') {
               setMessages((prev) =>
                 prev.map((m) =>
@@ -155,6 +162,15 @@ export function Chat({ conversationId: initialConvId, initialMessages = [] }: Pr
             <p className="font-mincho text-body">ことね</p>
             <p className="text-kana text-muted">あなたの話を聞きます</p>
           </div>
+          {onShowList ? (
+            <button
+              onClick={onShowList}
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-accent-soft/40 transition-colors"
+              aria-label="会話一覧"
+            >
+              <List size={20} className="text-muted" />
+            </button>
+          ) : null}
         </div>
       </header>
 
@@ -186,6 +202,11 @@ export function Chat({ conversationId: initialConvId, initialMessages = [] }: Pr
 
       {/* メッセージ */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-6">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-terracotta border-t-transparent" />
+          </div>
+        ) : (
         <ul className="space-y-4">
           {messages.length === 0 ? (
             <li className="py-8 text-center">
@@ -216,6 +237,7 @@ export function Chat({ conversationId: initialConvId, initialMessages = [] }: Pr
             </li>
           ))}
         </ul>
+        )}
       </div>
 
       {/* 入力エリア */}
