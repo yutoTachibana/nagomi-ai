@@ -56,7 +56,6 @@ src/
 │   │   ├── crisis/          # 緊急サポート (常時アクセス可能)
 │   │   ├── mindfulness/     # 呼吸法・瞑想
 │   │   ├── library/         # 心理教育コンテンツ
-│   │   ├── community/       # ハートのみコミュニティ
 │   │   └── medication/      # 服薬記録
 │   └── api/                 # API ルート
 │       ├── auth/            # Auth.js ([...nextauth], signup, logout)
@@ -65,13 +64,12 @@ src/
 │       ├── thought-record/
 │       ├── journal/
 │       ├── medication/      # + medication/log
-│       ├── community/       # + community/heart
 │       └── profile/
 ├── components/
 │   ├── ui/                  # 汎用 UI (Button, Card, Sheet, ...)
 │   ├── layout/              # BottomNav, AppShell
 │   ├── providers/           # AuthProvider (SessionProvider)
-│   ├── insights/, mindfulness/, medication/, community/, library/
+│   ├── insights/, mindfulness/, medication/, library/
 │   ├── home/, record/, kotone/, shared/
 ├── lib/
 │   ├── db/                  # Drizzle クライアント + スキーマ
@@ -93,7 +91,6 @@ src/
 
 - **認可はアプリ層で実装**: 全 API ルート・Server Component で `WHERE user_id = session.user.id` を明示
 - **暗号化対象**: 自由記述（`*_encrypted` カラム）はクライアント側で暗号化してから保存
-- **コミュニティ投稿のみ平文**: 本文はサーバー側でモデレーションするため
 - **`safety_events`**: クライシス検知のメタログ。**本文・キーワードは保存しない** （何が起きたかの type のみ）
 
 ### 暗号化方針 (重要)
@@ -193,11 +190,10 @@ src/
 3. **`/mindfulness`** - 4-7-8 呼吸法、ボックス呼吸（CSSアニメーション）、5-4-3-2-1 グラウンディング
 4. **`/library`** - 心理教育記事 5 本（不安、適応障害、双極性障害、認知の歪み、服薬）
 5. **`/medication`** - 服薬登録・ログ記録、飲み忘れを責めない UI
-6. **`/community`** - ハートのみコミュニティ（feature flag `NEXT_PUBLIC_FEATURE_COMMUNITY` で OFF）
-7. **オンボーディング詳細** - 3 ステップ肉付け、戻るボタン、暗号化・プライバシー説明追加
-8. **暗号化** - libsodium 実装済み。`NEXT_PUBLIC_FEATURE_E2E_ENCRYPTION=true` で本番化可能
-9. **テスト** - Vitest (51 テスト: crisis-detector + crypto) + Playwright E2E 構造
-10. API 追加: `/api/journal`, `/api/medication`, `/api/medication/log`, `/api/community`, `/api/community/heart`
+6. **オンボーディング詳細** - 3 ステップ肉付け、戻るボタン、暗号化・プライバシー説明追加
+7. **暗号化** - libsodium 実装済み。`NEXT_PUBLIC_FEATURE_E2E_ENCRYPTION=true` で本番化可能
+8. **テスト** - Vitest (51 テスト: crisis-detector + crypto) + Playwright E2E 構造
+9. API 追加: `/api/journal`, `/api/medication`, `/api/medication/log`
 
 ### 🚧 未実装 (Phase 1.5 / マイページ系)
 

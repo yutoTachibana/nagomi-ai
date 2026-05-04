@@ -9,7 +9,6 @@ import {
   date,
   time,
   jsonb,
-  primaryKey,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -215,26 +214,3 @@ export const doctorVisits = pgTable('doctor_visits', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
-// ====================================================================
-// community_posts & community_hearts
-// ====================================================================
-export const communityPosts = pgTable('community_posts', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  authorId: uuid('author_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  displayName: text('display_name').notNull(),
-  content: text('content').notNull(),
-  heartsCount: integer('hearts_count').notNull().default(0),
-  status: text('status').notNull().default('pending'), // 'pending' | 'approved' | 'hidden'
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  approvedAt: timestamp('approved_at', { withTimezone: true }),
-});
-
-export const communityHearts = pgTable(
-  'community_hearts',
-  {
-    userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-    postId: uuid('post_id').notNull().references(() => communityPosts.id, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => [primaryKey({ columns: [t.userId, t.postId] })],
-);
