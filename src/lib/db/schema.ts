@@ -1,220 +1,212 @@
 import {
-  pgTable,
-  uuid,
+  sqliteTable,
   text,
-  smallint,
   integer,
-  boolean,
-  timestamp,
-  date,
-  time,
-  jsonb,
-} from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
+} from 'drizzle-orm/sqlite-core';
+import { randomUUID } from 'crypto';
 
 // ====================================================================
 // users (Supabase auth.users の代替)
 // ====================================================================
-export const users = pgTable('users', {
-  id: uuid('id').defaultRandom().primaryKey(),
+export const users = sqliteTable('users', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash'), // nullable: OAuth ユーザーはパスワードなし
-  emailVerified: boolean('email_verified').notNull().default(false),
+  emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
   role: text('role').notNull().default('user'), // 'user' | 'admin'
   // OAuth プロバイダー情報
   oauthProvider: text('oauth_provider'), // 'google' | 'twitter' | null
   oauthProviderId: text('oauth_provider_id'), // プロバイダー側の ID
   avatarUrl: text('avatar_url'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // email_verification_tokens
 // ====================================================================
-export const emailVerificationTokens = pgTable('email_verification_tokens', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+export const emailVerificationTokens = sqliteTable('email_verification_tokens', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
   token: text('token').notNull().unique(),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: text('expires_at').notNull(),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // password_reset_tokens
 // ====================================================================
-export const passwordResetTokens = pgTable('password_reset_tokens', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+export const passwordResetTokens = sqliteTable('password_reset_tokens', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
   token: text('token').notNull().unique(),
-  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-  usedAt: timestamp('used_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: text('expires_at').notNull(),
+  usedAt: text('used_at'),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // profiles
 // ====================================================================
-export const profiles = pgTable('profiles', {
-  id: uuid('id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+export const profiles = sqliteTable('profiles', {
+  id: text('id').primaryKey().references(() => users.id),
   displayName: text('display_name'),
   birdPersona: text('bird_persona').default('kotone'),
-  birthYear: smallint('birth_year'),
-  diagnosisSelfReport: text('diagnosis_self_report').array().default(sql`ARRAY[]::text[]`),
-  preferredCheckInTime: time('preferred_check_in_time'),
-  onboardingCompleted: boolean('onboarding_completed').default(false),
+  birthYear: integer('birth_year'),
+  diagnosisSelfReport: text('diagnosis_self_report', { mode: 'json' }).$type<string[]>().$defaultFn(() => []),
+  preferredCheckInTime: text('preferred_check_in_time'),
+  onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' }).default(false),
   termsAcceptedVersion: text('terms_accepted_version'),
-  termsAcceptedAt: timestamp('terms_accepted_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  termsAcceptedAt: text('terms_accepted_at'),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // mood_entries
 // ====================================================================
-export const moodEntries = pgTable('mood_entries', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  moodScore: smallint('mood_score').notNull(),
-  energyLevel: smallint('energy_level').notNull(),
-  tags: text('tags').array().default(sql`ARRAY[]::text[]`),
+export const moodEntries = sqliteTable('mood_entries', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
+  moodScore: integer('mood_score').notNull(),
+  energyLevel: integer('energy_level').notNull(),
+  tags: text('tags', { mode: 'json' }).$type<string[]>().$defaultFn(() => []),
   noteEncrypted: text('note_encrypted'),
-  recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull().defaultNow(),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  recordedAt: text('recorded_at').notNull().$defaultFn(() => new Date().toISOString()),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // thought_records (CBT コラム法)
 // ====================================================================
-export const thoughtRecords = pgTable('thought_records', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+export const thoughtRecords = sqliteTable('thought_records', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
   situationEncrypted: text('situation_encrypted'),
-  emotionsBefore: jsonb('emotions_before'),
+  emotionsBefore: text('emotions_before', { mode: 'json' }),
   automaticThoughtEncrypted: text('automatic_thought_encrypted'),
   evidenceForEncrypted: text('evidence_for_encrypted'),
   evidenceAgainstEncrypted: text('evidence_against_encrypted'),
   balancedThoughtEncrypted: text('balanced_thought_encrypted'),
-  emotionsAfter: jsonb('emotions_after'),
-  cognitiveDistortions: text('cognitive_distortions').array().default(sql`ARRAY[]::text[]`),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  emotionsAfter: text('emotions_after', { mode: 'json' }),
+  cognitiveDistortions: text('cognitive_distortions', { mode: 'json' }).$type<string[]>().$defaultFn(() => []),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // journal_entries
 // ====================================================================
-export const journalEntries = pgTable('journal_entries', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+export const journalEntries = sqliteTable('journal_entries', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
   contentEncrypted: text('content_encrypted'),
   promptKey: text('prompt_key'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // mindfulness_sessions
 // ====================================================================
-export const mindfulnessSessions = pgTable('mindfulness_sessions', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+export const mindfulnessSessions = sqliteTable('mindfulness_sessions', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
   sessionType: text('session_type').notNull(),
   durationSeconds: integer('duration_seconds'),
-  completed: boolean('completed').notNull().default(false),
-  startedAt: timestamp('started_at', { withTimezone: true }).notNull().defaultNow(),
-  endedAt: timestamp('ended_at', { withTimezone: true }),
+  completed: integer('completed', { mode: 'boolean' }).notNull().default(false),
+  startedAt: text('started_at').notNull().$defaultFn(() => new Date().toISOString()),
+  endedAt: text('ended_at'),
 });
 
 // ====================================================================
 // conversations & messages (ことねとのチャット)
 // ====================================================================
-export const conversations = pgTable('conversations', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+export const conversations = sqliteTable('conversations', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
   title: text('title').default(''),
   summary: text('summary'), // 会話終了時に AI が生成する要約
-  everCrisisFlagged: boolean('ever_crisis_flagged').notNull().default(false),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  everCrisisFlagged: integer('ever_crisis_flagged', { mode: 'boolean' }).notNull().default(false),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // user_context (ことねノート - ユーザー理解コンテキスト)
 // ====================================================================
-export const userContext = pgTable('user_context', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+export const userContext = sqliteTable('user_context', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
   // 'background' | 'coping' | 'trigger' | 'preference' | 'custom'
   category: text('category').notNull(),
   content: text('content').notNull(),
   // AI が抽出したか、ユーザーが手動追加したか
   source: text('source').notNull().default('ai'), // 'ai' | 'user'
   // 抽出元の会話 (AI の場合)
-  conversationId: uuid('conversation_id').references(() => conversations.id, { onDelete: 'set null' }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  conversationId: text('conversation_id').references(() => conversations.id),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
-export const messages = pgTable('messages', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  conversationId: uuid('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+export const messages = sqliteTable('messages', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  conversationId: text('conversation_id').notNull().references(() => conversations.id),
+  userId: text('user_id').notNull().references(() => users.id),
   role: text('role').notNull(), // 'user' | 'assistant' | 'system'
   contentEncrypted: text('content_encrypted').notNull(),
-  crisisFlagged: boolean('crisis_flagged').notNull().default(false),
+  crisisFlagged: integer('crisis_flagged', { mode: 'boolean' }).notNull().default(false),
   tokensInput: integer('tokens_input'),
   tokensOutput: integer('tokens_output'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // safety_events
 // ====================================================================
-export const safetyEvents = pgTable('safety_events', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+export const safetyEvents = sqliteTable('safety_events', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
   eventType: text('event_type').notNull(),
   contextPath: text('context_path'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // medications & medication_logs
 // ====================================================================
-export const medications = pgTable('medications', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+export const medications = sqliteTable('medications', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
   nameEncrypted: text('name_encrypted').notNull(),
   dosage: text('dosage'),
-  schedule: jsonb('schedule'),
-  active: boolean('active').notNull().default(true),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  schedule: text('schedule', { mode: 'json' }),
+  active: integer('active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
-export const medicationLogs = pgTable('medication_logs', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  medicationId: uuid('medication_id').notNull().references(() => medications.id, { onDelete: 'cascade' }),
-  scheduledFor: timestamp('scheduled_for', { withTimezone: true }).notNull(),
-  takenAt: timestamp('taken_at', { withTimezone: true }),
+export const medicationLogs = sqliteTable('medication_logs', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
+  medicationId: text('medication_id').notNull().references(() => medications.id),
+  scheduledFor: text('scheduled_for').notNull(),
+  takenAt: text('taken_at'),
   status: text('status').notNull().default('missed'), // 'taken' | 'skipped' | 'missed'
   noteEncrypted: text('note_encrypted'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
 // doctor_visits
 // ====================================================================
-export const doctorVisits = pgTable('doctor_visits', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  visitedAt: date('visited_at').notNull(),
-  nextVisit: date('next_visit'),
+export const doctorVisits = sqliteTable('doctor_visits', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
+  visitedAt: text('visited_at').notNull(),
+  nextVisit: text('next_visit'),
   doctorNameEncrypted: text('doctor_name_encrypted'),
   notesEncrypted: text('notes_encrypted'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
-

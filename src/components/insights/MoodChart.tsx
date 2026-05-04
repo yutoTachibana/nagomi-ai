@@ -18,7 +18,7 @@ type MoodEntry = {
   moodScore: number;
   energyLevel: number;
   tags: string[];
-  recordedAt: Date;
+  recordedAt: string;
 };
 
 type Period = 30 | 90;

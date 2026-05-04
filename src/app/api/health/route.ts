@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    await db.execute(sql`SELECT 1`);
+    db.get(sql`SELECT 1`);
     return Response.json({
       status: 'ok',
       timestamp: new Date().toISOString(),

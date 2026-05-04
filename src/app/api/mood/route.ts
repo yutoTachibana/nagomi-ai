@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       energyLevel: parsed.data.energy_level,
       tags: parsed.data.tags,
       noteEncrypted: parsed.data.note_encrypted,
-      recordedAt: parsed.data.recorded_at ? new Date(parsed.data.recorded_at) : new Date(),
+      recordedAt: parsed.data.recorded_at ?? new Date().toISOString(),
     }).returning();
 
     return NextResponse.json({ ok: true, entry });

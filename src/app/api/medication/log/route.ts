@@ -31,8 +31,8 @@ export async function POST(req: Request) {
     const [log] = await db.insert(medicationLogs).values({
       userId,
       medicationId: parsed.data.medication_id,
-      scheduledFor: new Date(parsed.data.scheduled_for),
-      takenAt: parsed.data.taken_at ? new Date(parsed.data.taken_at) : null,
+      scheduledFor: parsed.data.scheduled_for,
+      takenAt: parsed.data.taken_at ?? null,
       status: parsed.data.status,
       noteEncrypted: parsed.data.note_encrypted,
     }).returning();

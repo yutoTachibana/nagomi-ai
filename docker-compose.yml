@@ -1,20 +1,12 @@
 services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: komorebi
-      POSTGRES_USER: komorebi
-      POSTGRES_PASSWORD: komorebi_dev
+  app:
+    build: .
     ports:
-      - "5432:5432"
+      - "3000:3000"
     volumes:
-      - db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U komorebi"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+      - app-data:/app/data
+    env_file:
+      - .env.local
 
 volumes:
-  db-data:
+  app-data:

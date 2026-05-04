@@ -22,9 +22,10 @@
 
 ```
 Frontend:  Next.js 15 (App Router) + TypeScript + Tailwind CSS
-DB:        PostgreSQL 16 (Docker Compose ローカル / AWS RDS 本番)
+DB:        SQLite (better-sqlite3, ローカルファイル / AWS App Runner + EFS)
 ORM:       Drizzle ORM (型安全, SQL ライクなクエリビルダ)
-認証:      Auth.js v5 (NextAuth) - Credentials provider + JWT
+認証:      Auth.js v5 (NextAuth) - Credentials + Google + X OAuth
+デプロイ:  AWS App Runner + EFS (SQLite 永続化)
 AI:        Claude Sonnet 4.6 (anthropic-sdk-typescript)
 暗号化:    libsodium-wrappers (クライアント側で sealed box)
 状態管理:  React Server Components + Server Actions が基本
@@ -217,12 +218,11 @@ src/
 ```bash
 # 初回
 cp .env.example .env.local
-# .env.local に DATABASE_URL, AUTH_SECRET, ANTHROPIC_API_KEY を設定
+# .env.local に AUTH_SECRET, ANTHROPIC_API_KEY を設定
 
 npm install
-docker compose up -d            # PostgreSQL 起動
-npm run db:push                 # Drizzle スキーマを DB に反映
-npm run dev                     # http://localhost:3000
+npm run db:push                 # SQLite DB にスキーマを反映 (data/komorebi.db 自動作成)
+npm run dev                     # https://localhost:3000 (HTTPS 自動)
 
 # テスト
 npm run test                    # Vitest (ユニットテスト)

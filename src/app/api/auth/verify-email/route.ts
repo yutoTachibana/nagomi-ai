@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     .where(
       and(
         eq(emailVerificationTokens.token, token),
-        gt(emailVerificationTokens.expiresAt, new Date()),
+        gt(emailVerificationTokens.expiresAt, new Date().toISOString()),
       ),
     )
     .limit(1);
@@ -30,7 +30,7 @@ export async function GET(req: Request) {
   // Mark user as verified
   await db
     .update(users)
-    .set({ emailVerified: true, updatedAt: new Date() })
+    .set({ emailVerified: true, updatedAt: new Date().toISOString() })
     .where(eq(users.id, record.userId));
 
   // Delete the used token

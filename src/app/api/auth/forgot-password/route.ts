@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   await db.insert(passwordResetTokens).values({
     userId: user.id,
     token,
-    expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+    expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour
   });
 
   await sendPasswordResetEmail(parsed.data.email, token).catch(() => {});

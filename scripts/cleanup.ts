@@ -13,9 +13,11 @@
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import Database from 'better-sqlite3';
 import { eq, lt, sql, and, inArray } from 'drizzle-orm';
+import path from 'path';
+import { mkdirSync } from 'fs';
 import {
   passwordResetTokens,
   emailVerificationTokens,
@@ -24,11 +26,16 @@ import {
   userContext,
 } from '../src/lib/db/schema';
 
-const client = postgres(process.env.DATABASE_URL!);
-const db = drizzle(client);
+const dbPath = process.env.DATABASE_PATH ?? path.join(process.cwd(), 'data', 'komorebi.db');
+mkdirSync(path.dirname(dbPath), { recursive: true });
+
+const sqlite = new Database(dbPath);
+sqlite.pragma('journal_mode = WAL');
+sqlite.pragma('foreign_keys = ON');
+const db = drizzle(sqlite);
 
 async function cleanExpiredTokens() {
-  const now = new Date();
+  const now = new Date().toISOString();
 
   const deletedReset = await db
     .delete(passwordResetTokens)
@@ -45,7 +52,7 @@ async function cleanExpiredTokens() {
 
 async function cleanEmptyConversations() {
   // メッセージが 0 件かつ作成から 1 時間以上経過した会話を削除
-  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
   const emptyConvs = await db
     .select({ id: conversations.id })
@@ -70,7 +77,7 @@ async function cleanEmptyConversations() {
 async function deduplicateUserContext() {
   // 同一ユーザー・同一カテゴリで内容が完全一致するものを重複排除
   // 最新のものを残し、古いものを削除
-  const duplicates = await db.execute(sql`
+  await db.run(sql`
     DELETE FROM user_context
     WHERE id IN (
       SELECT id FROM (
@@ -100,7 +107,7 @@ async function main() {
     console.error('クリーンアップエラー:', err);
     process.exit(1);
   } finally {
-    await client.end();
+    sqlite.close();
   }
 }
 

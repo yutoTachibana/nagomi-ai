@@ -8,7 +8,7 @@ type MoodEntry = {
   moodScore: number;
   energyLevel: number;
   tags: string[];
-  recordedAt: Date;
+  recordedAt: string;
 };
 
 export function TagSummary({ entries }: { entries: MoodEntry[] }) {

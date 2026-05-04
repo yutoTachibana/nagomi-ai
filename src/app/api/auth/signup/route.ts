@@ -49,7 +49,7 @@ export async function POST(req: Request) {
   await db.insert(emailVerificationTokens).values({
     userId: user.id,
     token,
-    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h
   });
   await sendVerificationEmail(parsed.data.email, token).catch(() => {});
 

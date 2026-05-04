@@ -162,7 +162,7 @@ export async function POST(req: Request) {
 
         // 会話の updated_at を更新
         await db.update(conversations)
-          .set({ updatedAt: new Date() })
+          .set({ updatedAt: new Date().toISOString() })
           .where(eq(conversations.id, convId!));
 
         // Fire and forget - don't block the response

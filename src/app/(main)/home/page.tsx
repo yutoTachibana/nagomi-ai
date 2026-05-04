@@ -20,6 +20,7 @@ export default async function HomePage() {
   // 最新の気分記録 (今日の有無を判定するため)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const todayIso = today.toISOString();
   const [todayMood] = await db
     .select({
       id: moodEntries.id,
@@ -31,7 +32,7 @@ export default async function HomePage() {
     .where(
       and(
         eq(moodEntries.userId, session!.user.id),
-        gte(moodEntries.recordedAt, today),
+        gte(moodEntries.recordedAt, todayIso),
       ),
     )
     .orderBy(desc(moodEntries.recordedAt))

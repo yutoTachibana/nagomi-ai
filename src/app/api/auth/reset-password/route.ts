@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     .where(
       and(
         eq(passwordResetTokens.token, parsed.data.token),
-        gt(passwordResetTokens.expiresAt, new Date()),
+        gt(passwordResetTokens.expiresAt, new Date().toISOString()),
         isNull(passwordResetTokens.usedAt),
       ),
     )
@@ -45,13 +45,13 @@ export async function POST(req: Request) {
   // Update user password
   await db
     .update(users)
-    .set({ passwordHash, updatedAt: new Date() })
+    .set({ passwordHash, updatedAt: new Date().toISOString() })
     .where(eq(users.id, record.userId));
 
   // Mark token as used
   await db
     .update(passwordResetTokens)
-    .set({ usedAt: new Date() })
+    .set({ usedAt: new Date().toISOString() })
     .where(eq(passwordResetTokens.id, record.id));
 
   return NextResponse.json({ ok: true });
