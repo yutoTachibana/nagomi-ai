@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Send, AlertCircle, List } from 'lucide-react';
+import { Send, AlertCircle, List, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -162,6 +162,13 @@ export function Chat({ conversationId: initialConvId, initialMessages = [], onCo
             <p className="font-mincho text-body">ことね</p>
             <p className="text-kana text-muted">あなたの話を聞きます</p>
           </div>
+          <Link
+            href="/kotone/note"
+            className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-accent-soft/40 transition-colors"
+            aria-label="ことねノート"
+          >
+            <BookOpen size={20} className="text-muted" />
+          </Link>
           {onShowList ? (
             <button
               onClick={onShowList}

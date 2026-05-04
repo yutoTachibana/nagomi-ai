@@ -130,7 +130,25 @@ export const conversations = pgTable('conversations', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   title: text('title').default(''),
+  summary: text('summary'), // 会話終了時に AI が生成する要約
   everCrisisFlagged: boolean('ever_crisis_flagged').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ====================================================================
+// user_context (ことねノート - ユーザー理解コンテキスト)
+// ====================================================================
+export const userContext = pgTable('user_context', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  // 'background' | 'coping' | 'trigger' | 'preference' | 'custom'
+  category: text('category').notNull(),
+  content: text('content').notNull(),
+  // AI が抽出したか、ユーザーが手動追加したか
+  source: text('source').notNull().default('ai'), // 'ai' | 'user'
+  // 抽出元の会話 (AI の場合)
+  conversationId: uuid('conversation_id').references(() => conversations.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });

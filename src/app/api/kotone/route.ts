@@ -4,8 +4,9 @@ import { db } from '@/lib/db';
 import { safetyEvents, conversations, messages as messagesTable } from '@/lib/db/schema';
 import { eq, and, asc } from 'drizzle-orm';
 import { getAnthropic, getModel } from '@/lib/claude/client';
-import { KOTONE_SYSTEM_PROMPT } from '@/lib/claude/system-prompts';
 import { checkCrisis, getCrisisPrompt } from '@/lib/safety/crisis-detector';
+import { buildSystemPrompt } from '@/lib/kotone/build-prompt';
+import { extractContext } from '@/lib/kotone/extract-context';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
@@ -105,9 +106,7 @@ export async function POST(req: Request) {
   const anthropic = getAnthropic();
   const model = getModel();
 
-  const systemPrompt =
-    KOTONE_SYSTEM_PROMPT +
-    (getCrisisPrompt(crisis) ? `\n\n${getCrisisPrompt(crisis)}` : '');
+  const systemPrompt = await buildSystemPrompt(userId, getCrisisPrompt(crisis));
 
   const chatMessages = [
     ...history.map((m) => ({
@@ -165,6 +164,9 @@ export async function POST(req: Request) {
         await db.update(conversations)
           .set({ updatedAt: new Date() })
           .where(eq(conversations.id, convId!));
+
+        // Fire and forget - don't block the response
+        extractContext(userId, convId!).catch(() => {});
 
         sseChunk(controller, { type: 'done' });
       } catch (err) {

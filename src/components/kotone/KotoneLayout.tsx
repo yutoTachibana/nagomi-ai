@@ -1,7 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { List, Plus, ArrowLeft, Trash2 } from 'lucide-react';
+import { List, Plus, ArrowLeft, Trash2, BookOpen } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { formatRelativeJa } from '@/lib/utils';
 import { Chat } from './Chat';
@@ -115,6 +116,13 @@ export function KotoneLayout({ conversations: initialConversations }: Props) {
               <ArrowLeft size={20} className="text-ink" />
             </button>
             <p className="font-mincho text-body flex-1">会話の履歴</p>
+            <Link
+              href="/kotone/note"
+              className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-accent-soft/40 transition-colors"
+              aria-label="ことねノート"
+            >
+              <BookOpen size={20} className="text-muted" />
+            </Link>
           </div>
         </header>
 
