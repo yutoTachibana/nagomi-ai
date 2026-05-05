@@ -44,9 +44,9 @@ export class KomorebiStack extends cdk.Stack {
     });
 
     ecsSg.addIngressRule(
-      ec2.Peer.ipv4(vpc.vpcCidrBlock),
+      ec2.Peer.anyIpv4(),
       ec2.Port.tcp(3000),
-      'Allow inbound 3000 from VPC',
+      'Allow inbound 3000 from anywhere',
     );
 
     efsSg.addIngressRule(
@@ -134,7 +134,7 @@ export class KomorebiStack extends cdk.Stack {
         DATABASE_PATH: '/app/data/komorebi.db',
         NODE_ENV: 'production',
         AUTH_SECRET: 'g5cnmjHmkVcAEqtizC6SSTxP7CFZ//FypVuDo66/OQs=',
-        AUTH_URL: 'https://j4wtcklcg4.execute-api.ap-northeast-1.amazonaws.com',
+        AUTH_URL: 'http://localhost:3000',
         NEXT_PUBLIC_APP_URL: 'https://j4wtcklcg4.execute-api.ap-northeast-1.amazonaws.com',
         ANTHROPIC_MODEL: 'claude-sonnet-4-6',
         ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? '',

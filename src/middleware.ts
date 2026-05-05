@@ -14,7 +14,9 @@ export async function middleware(req: NextRequest) {
   if (isCrisis || isAuthApi || isHealth) return NextResponse.next();
 
   // JWT トークンの検証のみ (DB アクセスなし = Edge Runtime 対応)
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+  const useSecureCookies = process.env.AUTH_URL?.startsWith('https://') ?? false;
+  const cookieName = useSecureCookies ? '__Secure-authjs.session-token' : 'authjs.session-token';
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET, cookieName });
 
   if (!token && !isPublic) {
     if (path.startsWith('/api/')) {

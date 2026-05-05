@@ -55,11 +55,42 @@ if (process.env.AUTH_TWITTER_ID && process.env.AUTH_TWITTER_SECRET) {
   );
 }
 
+const useSecureCookies = process.env.AUTH_URL?.startsWith('https://') ?? false;
+
 export const { auth, signIn, signOut, handlers } = NextAuth({
   trustHost: true,
   providers,
   session: { strategy: 'jwt' },
   pages: { signIn: '/login' },
+  cookies: {
+    sessionToken: {
+      name: useSecureCookies ? '__Secure-authjs.session-token' : 'authjs.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: useSecureCookies,
+      },
+    },
+    callbackUrl: {
+      name: useSecureCookies ? '__Secure-authjs.callback-url' : 'authjs.callback-url',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: useSecureCookies,
+      },
+    },
+    csrfToken: {
+      name: useSecureCookies ? '__Host-authjs.csrf-token' : 'authjs.csrf-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: useSecureCookies,
+      },
+    },
+  },
   callbacks: {
     async signIn({ user, account }) {
       // OAuth ログインの場合: ユーザーを自動作成 or 紐づけ
