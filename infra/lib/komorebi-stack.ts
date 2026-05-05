@@ -5,6 +5,9 @@ import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as efs from 'aws-cdk-lib/aws-efs';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as events_targets from 'aws-cdk-lib/aws-events-targets';
 import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apigwv2_integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as servicediscovery from 'aws-cdk-lib/aws-servicediscovery';
@@ -134,7 +137,7 @@ export class KomorebiStack extends cdk.Stack {
         AUTH_URL: 'https://j4wtcklcg4.execute-api.ap-northeast-1.amazonaws.com',
         NEXT_PUBLIC_APP_URL: 'https://j4wtcklcg4.execute-api.ap-northeast-1.amazonaws.com',
         ANTHROPIC_MODEL: 'claude-sonnet-4-6',
-        // ANTHROPIC_API_KEY は手動でタスク定義に追加
+        ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? '',
       },
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: 'komorebi',
@@ -202,6 +205,74 @@ export class KomorebiStack extends cdk.Stack {
       routeKey: apigwv2.HttpRouteKey.with('/', apigwv2.HttpMethod.ANY),
       integration,
     });
+
+    // --- CloudMap ポート自動修正 Lambda ---
+    const cloudMapService = service.cloudMapService!;
+
+    const portFixLambda = new lambda.Function(this, 'CloudMapPortFix', {
+      runtime: lambda.Runtime.PYTHON_3_12,
+      handler: 'index.handler',
+      timeout: cdk.Duration.seconds(30),
+      logRetention: logs.RetentionDays.ONE_WEEK,
+      environment: {
+        SERVICE_ID: cloudMapService.serviceId,
+        PORT: '3000',
+      },
+      code: lambda.Code.fromInline(`
+import boto3
+import os
+import json
+
+sd = boto3.client('servicediscovery')
+SERVICE_ID = os.environ['SERVICE_ID']
+PORT = os.environ['PORT']
+
+def handler(event, context):
+    print(json.dumps(event, default=str))
+    paginator = sd.get_paginator('list_instances')
+    for page in paginator.paginate(ServiceId=SERVICE_ID):
+        for inst in page['Instances']:
+            attrs = inst.get('Attributes', {})
+            if 'AWS_INSTANCE_PORT' not in attrs:
+                instance_id = inst['Id']
+                print(f"Patching instance {instance_id}: adding AWS_INSTANCE_PORT={PORT}")
+                attrs['AWS_INSTANCE_PORT'] = PORT
+                sd.register_instance(
+                    ServiceId=SERVICE_ID,
+                    InstanceId=instance_id,
+                    Attributes=attrs,
+                )
+                print(f"Patched {instance_id}")
+            else:
+                print(f"Instance {inst['Id']} already has port={attrs['AWS_INSTANCE_PORT']}")
+    return {'statusCode': 200}
+`),
+    });
+
+    portFixLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: [
+          'servicediscovery:ListInstances',
+          'servicediscovery:RegisterInstance',
+        ],
+        resources: ['*'],
+      }),
+    );
+
+    // ECS タスクが RUNNING になったら Lambda を実行
+    const rule = new events.Rule(this, 'EcsTaskRunning', {
+      description: 'Trigger CloudMap port fix when komorebi tasks start',
+      eventPattern: {
+        source: ['aws.ecs'],
+        detailType: ['ECS Task State Change'],
+        detail: {
+          clusterArn: [{ suffix: ':cluster/komorebi' }] as any,
+          lastStatus: ['RUNNING'],
+        },
+      },
+    });
+
+    rule.addTarget(new events_targets.LambdaFunction(portFixLambda));
 
     // --- Outputs ---
     new cdk.CfnOutput(this, 'AppUrl', {
