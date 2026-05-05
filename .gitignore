@@ -50,4 +50,7 @@ backups/
 certificates
 
 # SQLite database
-data/infra/cdk.out/
+data/
+
+# CDK output (contains resolved secrets)
+infra/cdk.out/

@@ -138,6 +138,8 @@ export class KomorebiStack extends cdk.Stack {
         NEXT_PUBLIC_APP_URL: 'https://j4wtcklcg4.execute-api.ap-northeast-1.amazonaws.com',
         ANTHROPIC_MODEL: 'claude-sonnet-4-6',
         ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? '',
+        AUTH_TWITTER_ID: 'dmpGS2t6NUNPWTFiaEJ1RGVtYUo6MTpjaQ',
+        AUTH_TWITTER_SECRET: process.env.AUTH_TWITTER_SECRET ?? '',
       },
       logging: ecs.LogDrivers.awsLogs({
         streamPrefix: 'komorebi',
