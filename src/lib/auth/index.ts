@@ -56,6 +56,7 @@ if (process.env.AUTH_TWITTER_ID && process.env.AUTH_TWITTER_SECRET) {
 }
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
+  trustHost: true,
   providers,
   session: { strategy: 'jwt' },
   pages: { signIn: '/login' },
