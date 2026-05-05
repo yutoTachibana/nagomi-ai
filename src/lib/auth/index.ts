@@ -6,7 +6,7 @@ import Twitter from 'next-auth/providers/twitter';
 import bcrypt from 'bcryptjs';
 import { db } from '@/lib/db';
 import { users, profiles } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 // 環境変数が設定されているプロバイダーのみ有効化
 const providers: Provider[] = [
@@ -63,40 +63,61 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
     async signIn({ user, account }) {
       // OAuth ログインの場合: ユーザーを自動作成 or 紐づけ
       if (account?.provider && account.provider !== 'credentials') {
-        const email = user.email;
-        if (!email) return false;
+        try {
+          const email = user.email;
+          const providerId = account.providerAccountId;
 
-        const [existing] = await db
-          .select()
-          .from(users)
-          .where(eq(users.email, email))
-          .limit(1);
+          // まずプロバイダーIDで既存ユーザーを検索
+          let [existing] = await db
+            .select()
+            .from(users)
+            .where(and(
+              eq(users.oauthProvider, account.provider),
+              eq(users.oauthProviderId, providerId),
+            ))
+            .limit(1);
 
-        if (existing) {
-          if (!existing.oauthProvider) {
-            await db.update(users).set({
-              oauthProvider: account.provider,
-              oauthProviderId: account.providerAccountId,
-              emailVerified: true,
-              avatarUrl: (user as { image?: string }).image ?? null,
-            }).where(eq(users.id, existing.id));
+          // プロバイダーIDで見つからない場合、メールアドレスで検索
+          if (!existing && email) {
+            [existing] = await db
+              .select()
+              .from(users)
+              .where(eq(users.email, email))
+              .limit(1);
           }
-          user.id = existing.id;
-        } else {
-          const [newUser] = await db.insert(users).values({
-            email,
-            oauthProvider: account.provider,
-            oauthProviderId: account.providerAccountId,
-            emailVerified: true,
-            avatarUrl: (user as { image?: string }).image ?? null,
-          }).returning();
 
-          await db.insert(profiles).values({
-            id: newUser.id,
-            displayName: user.name ?? null,
-          });
+          if (existing) {
+            // 既存ユーザー: OAuth 情報を更新
+            if (!existing.oauthProvider) {
+              await db.update(users).set({
+                oauthProvider: account.provider,
+                oauthProviderId: providerId,
+                emailVerified: true,
+                avatarUrl: (user as { image?: string }).image ?? null,
+              }).where(eq(users.id, existing.id));
+            }
+            user.id = existing.id;
+          } else {
+            // 新規ユーザー作成 (メールがない場合はプロバイダーIDベースで生成)
+            const userEmail = email ?? `${account.provider}_${providerId}@oauth.local`;
+            const [newUser] = await db.insert(users).values({
+              email: userEmail,
+              oauthProvider: account.provider,
+              oauthProviderId: providerId,
+              emailVerified: !!email,
+              avatarUrl: (user as { image?: string }).image ?? null,
+            }).returning();
 
-          user.id = newUser.id;
+            await db.insert(profiles).values({
+              id: newUser.id,
+              displayName: user.name ?? null,
+            });
+
+            user.id = newUser.id;
+          }
+        } catch (err) {
+          console.error('[auth] OAuth signIn error:', err);
+          return false;
         }
       }
       return true;
