@@ -1,5 +1,5 @@
 # ============================================================
-# こもれび Production Dockerfile (ECS Fargate + EFS 用)
+# こもれび Production Dockerfile (App Runner + Litestream)
 # ============================================================
 
 FROM node:20-alpine AS builder
@@ -16,8 +16,6 @@ ENV NEXT_PUBLIC_FEATURE_E2E_ENCRYPTION=${NEXT_PUBLIC_FEATURE_E2E_ENCRYPTION}
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
-
-# Production deps only
 RUN npm ci --legacy-peer-deps --omit=dev
 
 FROM node:20-alpine AS runner
@@ -25,16 +23,23 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Litestream をインストール
+RUN wget -q https://github.com/benbjohnson/litestream/releases/download/v0.3.13/litestream-v0.3.13-linux-amd64.tar.gz \
+    && tar -xzf litestream-v0.3.13-linux-amd64.tar.gz -C /usr/local/bin/ \
+    && rm litestream-v0.3.13-linux-amd64.tar.gz
+
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# アプリ全体をコピー (standalone 不使用)
 COPY --from=builder --chown=nextjs:nodejs /app/package.json ./
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --chown=nextjs:nodejs litestream.yml /etc/litestream.yml
 
 RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+RUN chmod +x scripts/start.sh
 
 USER nextjs
 EXPOSE 3000
@@ -42,6 +47,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 ENV DATABASE_PATH=/app/data/komorebi.db
 
-COPY --from=builder --chown=nextjs:nodejs /app/scripts/init-db.js ./scripts/init-db.js
-
-CMD ["sh", "-c", "node scripts/init-db.js && ./node_modules/.bin/next start"]
+CMD ["sh", "scripts/start.sh"]

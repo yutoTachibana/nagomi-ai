@@ -1,0 +1,7 @@
+dbs:
+  - path: /app/data/komorebi.db
+    replicas:
+      - type: s3
+        bucket: komorebi-litestream-141166306676
+        path: replica
+        region: ap-northeast-1
