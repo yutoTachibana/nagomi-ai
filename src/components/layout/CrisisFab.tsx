@@ -26,8 +26,9 @@ export function CrisisFab() {
     <Link
       href="/crisis"
       aria-label="サポートが必要なときはこちら"
+      style={{ bottom: 'calc(env(safe-area-inset-bottom) + 5.5rem)' }}
       className="
-        fixed bottom-20 right-4 z-40
+        fixed right-4 z-40
         flex h-11 w-11 items-center justify-center rounded-full
         bg-card/90 backdrop-blur border border-plum/25 shadow-soft
         text-plum/80
