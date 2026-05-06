@@ -210,3 +210,53 @@ export const doctorVisits = sqliteTable('doctor_visits', {
   createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
   updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
+
+// ====================================================================
+// safety_plans (Stanley-Brown 6 ステップ. 1 ユーザー 1 行)
+// ====================================================================
+export const safetyPlans = sqliteTable('safety_plans', {
+  userId: text('user_id').primaryKey().references(() => users.id),
+  warningSignsEncrypted: text('warning_signs_encrypted'),
+  internalCopingEncrypted: text('internal_coping_encrypted'),
+  socialDistractionsEncrypted: text('social_distractions_encrypted'),
+  trustedPeopleEncrypted: text('trusted_people_encrypted'),
+  professionalsEncrypted: text('professionals_encrypted'),
+  environmentEncrypted: text('environment_encrypted'),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ====================================================================
+// sleep_entries (簡易. bedtime/waketime/quality の 3 軸)
+// ====================================================================
+export const sleepEntries = sqliteTable('sleep_entries', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
+  /** 寝た日 (起床日の YYYY-MM-DD). 1日 1 行を想定 */
+  recordedDate: text('recorded_date').notNull(),
+  /** ISO datetime, 任意 */
+  bedtime: text('bedtime'),
+  /** ISO datetime, 任意 */
+  wakeTime: text('wake_time'),
+  /** 1 (とても悪い) - 5 (とても良い) */
+  qualityScore: integer('quality_score'),
+  noteEncrypted: text('note_encrypted'),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ====================================================================
+// medication_side_effects (服薬中の副作用の記録)
+// ====================================================================
+export const medicationSideEffects = sqliteTable('medication_side_effects', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
+  /** 任意. 特定の薬と紐づけたい場合に使用 */
+  medicationId: text('medication_id').references(() => medications.id),
+  /** 種類: 'drowsiness' | 'weight_gain' | ... see UI options */
+  effectType: text('effect_type').notNull(),
+  /** 1 (軽微) - 5 (強い). 0 は記録なし扱い */
+  severity: integer('severity'),
+  noteEncrypted: text('note_encrypted'),
+  recordedAt: text('recorded_at').notNull().$defaultFn(() => new Date().toISOString()),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+});

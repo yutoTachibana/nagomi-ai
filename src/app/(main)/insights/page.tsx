@@ -7,6 +7,7 @@ import { moodEntries as moodEntriesTable } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { MoodChart } from '@/components/insights/MoodChart';
 import { TagSummary } from '@/components/insights/TagSummary';
+import { SleepSummary } from '@/components/insights/SleepSummary';
 
 export default async function InsightsPage() {
   const session = await auth();
@@ -43,6 +44,8 @@ export default async function InsightsPage() {
       </header>
 
       <MoodChart entries={entries} />
+
+      <SleepSummary />
 
       <TagSummary entries={entries} />
 

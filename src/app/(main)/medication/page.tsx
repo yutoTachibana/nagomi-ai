@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Activity } from 'lucide-react';
 import { MedicationManager } from '@/components/medication/MedicationManager';
+import { Card, CardLabel } from '@/components/ui/Card';
 
 export default function MedicationPage() {
   return (
@@ -21,6 +22,24 @@ export default function MedicationPage() {
       </p>
 
       <MedicationManager />
+
+      <Link href="/medication/side-effects" className="block">
+        <Card className="hover:bg-accent-soft/30 transition-colors">
+          <div className="flex items-start gap-3">
+            <div className="rounded-full bg-plum/10 p-2.5 mt-0.5">
+              <Activity size={18} className="text-plum" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardLabel>気になることの記録</CardLabel>
+              <p className="mt-1 text-body text-ink">体や気持ちの違和感をメモする</p>
+              <p className="mt-1 text-kana text-muted">
+                次の診察で主治医と整理できます
+              </p>
+            </div>
+            <ChevronRight size={18} className="text-muted shrink-0 mt-1" />
+          </div>
+        </Card>
+      </Link>
     </div>
   );
 }

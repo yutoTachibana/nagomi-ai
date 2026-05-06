@@ -177,6 +177,40 @@ CREATE TABLE IF NOT EXISTS doctor_visits (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS safety_plans (
+  user_id TEXT PRIMARY KEY REFERENCES users(id),
+  warning_signs_encrypted TEXT,
+  internal_coping_encrypted TEXT,
+  social_distractions_encrypted TEXT,
+  trusted_people_encrypted TEXT,
+  professionals_encrypted TEXT,
+  environment_encrypted TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS sleep_entries (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  recorded_date TEXT NOT NULL,
+  bedtime TEXT,
+  wake_time TEXT,
+  quality_score INTEGER,
+  note_encrypted TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS medication_side_effects (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  medication_id TEXT REFERENCES medications(id),
+  effect_type TEXT NOT NULL,
+  severity INTEGER,
+  note_encrypted TEXT,
+  recorded_at TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `;
 
 db.exec(tables);

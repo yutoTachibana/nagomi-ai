@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Phone, Globe, Clock, ArrowLeft } from 'lucide-react';
+import { Phone, Globe, Clock, ArrowLeft, ShieldCheck, ChevronRight } from 'lucide-react';
 import { CRISIS_RESOURCES } from '@/lib/safety/crisis-detector';
 import { Card, CardLabel, CardTitle } from '@/components/ui/Card';
 
@@ -39,6 +39,24 @@ export default function CrisisPage() {
           下のどれかに、ためしに電話してみてもいいし、ただ番号を見るだけでも大丈夫です。
         </p>
       </Card>
+
+      <Link href="/crisis/plan" className="block">
+        <Card className="hover:bg-accent-soft/30 transition-colors">
+          <div className="flex items-start gap-3">
+            <div className="rounded-full bg-plum/10 p-2.5 mt-0.5">
+              <ShieldCheck size={18} className="text-plum" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardLabel>セーフティプラン</CardLabel>
+              <p className="mt-1 text-body text-ink">あなたの「もしも」のときの備え</p>
+              <p className="mt-1 text-kana text-muted">
+                平時に書いておくと、しんどい時の自分が助かります
+              </p>
+            </div>
+            <ChevronRight size={18} className="text-muted shrink-0 mt-1" />
+          </div>
+        </Card>
+      </Link>
 
       <section className="space-y-3">
         <h2 className="font-mincho text-h3 px-1">話せる相手</h2>
