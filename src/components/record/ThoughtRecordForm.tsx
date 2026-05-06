@@ -85,7 +85,7 @@ export function ThoughtRecordForm() {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.message ?? '保存できませんでした');
       }
-      router.push('/home');
+      router.push('/record/thought');
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : '保存できませんでした');

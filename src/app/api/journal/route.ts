@@ -29,7 +29,8 @@ export async function POST(req: Request) {
     }).returning();
 
     return NextResponse.json({ ok: true, entry });
-  } catch {
+  } catch (err) {
+    console.error('[journal] insert failed:', { userId, err: err instanceof Error ? err.message : err });
     return NextResponse.json({ message: '保存に失敗しました' }, { status: 500 });
   }
 }
