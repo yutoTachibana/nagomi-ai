@@ -54,3 +54,4 @@ data/
 
 # CDK output (contains resolved secrets)
 infra/cdk.out/
+.claude/
