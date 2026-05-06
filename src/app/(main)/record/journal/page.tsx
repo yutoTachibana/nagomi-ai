@@ -12,9 +12,9 @@ import { getRandomPrompts, JOURNAL_PROMPTS, type JournalPrompt } from '@/lib/jou
 
 interface JournalEntry {
   id: string;
-  prompt_key: string | null;
-  content_encrypted: string | null;
-  created_at: string;
+  promptKey: string | null;
+  contentEncrypted: string | null;
+  createdAt: string;
 }
 
 export default function Page() {
@@ -44,8 +44,8 @@ export default function Page() {
         // Decrypt previews (first ~40 chars)
         const decrypted: Record<string, string> = {};
         for (const entry of (data ?? []) as JournalEntry[]) {
-          if (entry.content_encrypted) {
-            const plain = await decrypt(entry.content_encrypted);
+          if (entry.contentEncrypted) {
+            const plain = await decrypt(entry.contentEncrypted);
             if (plain) {
               decrypted[entry.id] = plain.length > 40 ? plain.slice(0, 40) + '...' : plain;
             }
@@ -176,12 +176,12 @@ export default function Page() {
                     {previews[entry.id] ?? '(暗号化されています)'}
                   </p>
                   <span className="text-kana text-muted whitespace-nowrap shrink-0">
-                    {formatRelativeJa(entry.created_at)}
+                    {formatRelativeJa(entry.createdAt)}
                   </span>
                 </div>
-                {entry.prompt_key ? (
+                {entry.promptKey ? (
                   <p className="text-kana text-muted mt-1 truncate">
-                    {promptTextByKey(entry.prompt_key)}
+                    {promptTextByKey(entry.promptKey)}
                   </p>
                 ) : null}
               </Card>
