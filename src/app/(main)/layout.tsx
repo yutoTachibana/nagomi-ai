@@ -13,7 +13,7 @@ import { CrisisFab } from '@/components/layout/CrisisFab';
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto flex h-[100dvh] max-w-md flex-col">
-      <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
+      <main className="flex-1 min-h-0 overflow-y-auto overscroll-none">{children}</main>
       <CrisisFab />
       <BottomNav />
     </div>
