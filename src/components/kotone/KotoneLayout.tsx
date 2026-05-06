@@ -123,7 +123,10 @@ export function KotoneLayout({ conversations: initialConversations }: Props) {
   // 会話一覧表示
   if (showList) {
     return (
-      <div className="flex h-full flex-col bg-paper">
+      <div
+        className="flex flex-col bg-paper"
+        style={{ height: 'calc(100dvh - var(--nav-h))' }}
+      >
         {/* ヘッダー */}
         <header className="border-b border-accent-soft px-5 py-3 pt-safe">
           <div className="flex items-center gap-3">

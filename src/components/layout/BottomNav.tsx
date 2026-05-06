@@ -19,7 +19,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="メインナビゲーション"
-      className="z-30 border-t border-accent-soft bg-card/95 backdrop-blur-md pb-safe"
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 border-t border-accent-soft bg-card/95 backdrop-blur-md pb-safe"
     >
       <ul className="grid grid-cols-5">
         {tabs.map(({ href, label, Icon }) => {

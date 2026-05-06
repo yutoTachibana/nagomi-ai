@@ -150,7 +150,10 @@ export function KotoneNote() {
   const hasItems = items.length > 0;
 
   return (
-    <div className="flex h-full flex-col bg-paper">
+    <div
+      className="flex flex-col bg-paper"
+      style={{ height: 'calc(100dvh - var(--nav-h))' }}
+    >
       {/* Header */}
       <header className="border-b border-accent-soft px-5 py-3 pt-safe">
         <div className="flex items-center gap-3">

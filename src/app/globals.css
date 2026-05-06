@@ -138,3 +138,8 @@
   .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
   .pt-safe { padding-top: max(1rem, env(safe-area-inset-top)); }
 }
+
+/* BottomNav の総高さ (icon + ラベル + iOS 安全領域) */
+:root {
+  --nav-h: calc(env(safe-area-inset-bottom) + 3.75rem);
+}
