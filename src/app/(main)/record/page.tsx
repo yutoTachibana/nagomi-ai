@@ -4,7 +4,7 @@ import { Heart, Brain, BookOpen } from 'lucide-react';
 
 export default function RecordIndex() {
   return (
-    <div className="px-5 pt-safe pb-8 space-y-5">
+    <div className="px-5 pt-safe pb-4 space-y-5">
       <header className="pt-4">
         <p className="text-kana uppercase tracking-widest text-muted">RECORD</p>
         <h1 className="mt-1 font-mincho text-h1">記録する</h1>

@@ -30,7 +30,7 @@ export default async function InsightsPage() {
   }));
 
   return (
-    <div className="px-5 pt-safe space-y-5 pb-8">
+    <div className="px-5 pt-safe space-y-5 pb-4">
       <header className="flex items-center gap-2 pt-4">
         <Link
           href="/home"

@@ -32,7 +32,7 @@ export default async function ArticlePage({ params }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-md min-h-screen px-5 pt-safe pb-12">
+    <div className="mx-auto max-w-md px-5 pt-safe pb-4">
       <header className="flex items-center gap-2 pt-4 mb-6">
         <Link
           href="/library"

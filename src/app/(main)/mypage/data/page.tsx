@@ -9,7 +9,7 @@ export default async function DataPage() {
   if (!session?.user?.id) redirect('/login');
 
   return (
-    <div className="px-5 pt-safe pb-8 space-y-5">
+    <div className="px-5 pt-safe pb-4 space-y-5">
       <header className="flex items-center gap-3 pt-4">
         <Link href="/mypage" className="text-muted">
           <ArrowLeft size={20} />

@@ -99,7 +99,7 @@ export default function Page() {
   }
 
   return (
-    <div className="px-5 pt-safe pb-8 space-y-5">
+    <div className="px-5 pt-safe pb-4 space-y-5">
       <header className="flex items-center gap-3 pt-4">
         <Link href="/record" aria-label="戻る" className="p-2 -ml-2 rounded-pill hover:bg-accent-soft/40">
           <ArrowLeft size={20} />

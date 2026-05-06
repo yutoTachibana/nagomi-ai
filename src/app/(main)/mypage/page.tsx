@@ -15,7 +15,7 @@ export default async function MyPage() {
     .limit(1);
 
   return (
-    <div className="px-5 pt-safe pb-8 space-y-5">
+    <div className="px-5 pt-safe pb-4 space-y-5">
       <header className="pt-4">
         <p className="text-kana uppercase tracking-widest text-muted">MY PAGE</p>
         <h1 className="mt-1 font-mincho text-h1">{profile?.displayName ?? 'あなた'}</h1>

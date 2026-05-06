@@ -54,7 +54,7 @@ export default async function HomePage() {
   const name = profile?.displayName ?? '';
 
   return (
-    <div className="px-5 pt-safe space-y-5 pb-8">
+    <div className="px-5 pt-safe space-y-5 pb-4">
       {/* ヘッダー */}
       <header className="pt-4">
         <p className="text-kana uppercase tracking-widest text-muted">

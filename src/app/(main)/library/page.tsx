@@ -5,7 +5,7 @@ import { ARTICLES } from '@/lib/library/articles';
 
 export default function LibraryPage() {
   return (
-    <div className="px-5 pt-safe space-y-5 pb-8">
+    <div className="px-5 pt-safe space-y-5 pb-4">
       <header className="pt-4">
         <p className="text-kana uppercase tracking-widest text-muted">
           LIBRARY

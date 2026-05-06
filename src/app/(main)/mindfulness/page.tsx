@@ -4,7 +4,7 @@ import { BreathingExercise } from '@/components/mindfulness/BreathingExercise';
 
 export default function Page() {
   return (
-    <div className="px-5 pt-safe pb-8 space-y-5">
+    <div className="px-5 pt-safe pb-4 space-y-5">
       <header className="flex items-center gap-2 pt-4">
         <Link
           href="/home"

@@ -86,7 +86,7 @@ export default function VisitsPage() {
   };
 
   return (
-    <div className="px-5 pt-safe pb-8 space-y-5">
+    <div className="px-5 pt-safe pb-4 space-y-5">
       {/* Header */}
       <header className="flex items-center gap-3">
         <Link href="/mypage" className="text-muted hover:text-ink transition-colors" aria-label="戻る">

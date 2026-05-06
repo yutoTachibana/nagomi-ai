@@ -15,7 +15,7 @@ import { Card, CardLabel, CardTitle } from '@/components/ui/Card';
  */
 export default function CrisisPage() {
   return (
-    <div className="mx-auto max-w-md min-h-screen px-5 pt-safe pb-12 space-y-5">
+    <div className="mx-auto max-w-md px-5 pt-safe pb-4 space-y-5">
       <header className="flex items-center gap-2 pt-4">
         <Link
           href="/home"
