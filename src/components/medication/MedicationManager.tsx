@@ -7,6 +7,11 @@ import { Input } from '@/components/ui/Input';
 import { TagChips } from '@/components/ui/TagChips';
 import { encrypt, decrypt } from '@/lib/crypto';
 import { Check, Minus, Plus, Pill } from 'lucide-react';
+import {
+  searchMedications,
+  CATEGORY_LABEL,
+  type MedicationSuggestion,
+} from '@/lib/medication-suggestions';
 
 // ----------------------------------------------------------------
 // Types
@@ -61,6 +66,12 @@ export function MedicationManager() {
   const [newName, setNewName] = React.useState('');
   const [newDosage, setNewDosage] = React.useState('');
   const [newTimes, setNewTimes] = React.useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = React.useState(false);
+
+  const suggestions: MedicationSuggestion[] = React.useMemo(
+    () => searchMedications(newName, 6),
+    [newName],
+  );
 
   // ----- Data fetching -----
 
@@ -167,12 +178,40 @@ export function MedicationManager() {
       <Card className="space-y-5 p-5">
         <h2 className="font-mincho text-h3">お薬を追加</h2>
 
-        <Input
-          label="お薬の名前"
-          placeholder="例: レクサプロ"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-        />
+        <div className="space-y-2 relative">
+          <Input
+            label="お薬の名前"
+            placeholder="例: レクサプロ"
+            value={newName}
+            onChange={(e) => {
+              setNewName(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            autoComplete="off"
+          />
+          {showSuggestions && suggestions.length > 0 && newName.trim() ? (
+            <ul className="rounded-card border border-accent-soft bg-card shadow-soft divide-y divide-accent-soft/60 overflow-hidden">
+              {suggestions.map((s) => (
+                <li key={s.name}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewName(s.name);
+                      setShowSuggestions(false);
+                    }}
+                    className="flex w-full items-center justify-between px-4 py-2.5 text-left hover:bg-accent-soft/40 transition-colors"
+                  >
+                    <span className="text-body text-ink">{s.name}</span>
+                    <span className="text-kana text-muted">
+                      {CATEGORY_LABEL[s.category]}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
 
         <Input
           label="用量（任意）"
