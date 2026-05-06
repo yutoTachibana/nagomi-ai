@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Send, AlertCircle, List, BookOpen } from 'lucide-react';
+import { Send, AlertCircle, List, BookOpen, LifeBuoy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -30,11 +30,27 @@ export function Chat({ conversationId: initialConvId, initialMessages = [], onCo
 
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+  const hasScrolledOnceRef = React.useRef(false);
 
-  // 自動スクロール
+  // 自動スクロール: 初回マウント時はアニメーションなしで一気に最下部へ.
+  // 以降のメッセージ追加時は smooth で滑らかに.
   React.useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages]);
+    const el = scrollRef.current;
+    if (!el) return;
+    if (!hasScrolledOnceRef.current) {
+      el.scrollTop = el.scrollHeight;
+      hasScrolledOnceRef.current = true;
+    } else {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    }
+  }, [messages, loading]);
+
+  // ローディング完了後 (履歴取得直後) にも最下部へ
+  React.useEffect(() => {
+    if (!loading && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [loading]);
 
   // textarea 高さ自動調整
   React.useEffect(() => {
@@ -178,6 +194,13 @@ export function Chat({ conversationId: initialConvId, initialMessages = [], onCo
               <List size={20} className="text-muted" />
             </button>
           ) : null}
+          <Link
+            href="/crisis"
+            className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-plum/10 transition-colors"
+            aria-label="サポートが必要なときはこちら"
+          >
+            <LifeBuoy size={18} className="text-plum/70" />
+          </Link>
         </div>
       </header>
 

@@ -224,9 +224,14 @@ export function KotoneLayout({ conversations: initialConversations }: Props) {
   }
 
   // チャット表示
+  // key には loading 状態も含める. 履歴のロード完了時に Chat を再マウントして
+  // initialMessages を反映させる (useState の初期値はマウント時しか効かないため).
+  const chatKey = selectedId
+    ? `${selectedId}-${loading ? 'loading' : 'loaded'}`
+    : 'new';
   return (
     <Chat
-      key={selectedId ?? 'new'}
+      key={chatKey}
       conversationId={selectedId ?? undefined}
       initialMessages={selectedId ? loadedMessages : []}
       onConversationCreated={handleConversationCreated}
