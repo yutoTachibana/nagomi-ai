@@ -90,7 +90,13 @@ export function KotoneLayout({ conversations: initialConversations }: Props) {
       updatedAt: new Date().toISOString(),
     };
     setConversations((prev) => [newConv, ...prev]);
-    setSelectedId(id);
+    // 注意: ここで setSelectedId(id) してはいけない.
+    // selectedId が変わると key が 'new' → 'id-loaded' に切り替わり、
+    // Chat コンポーネントが再マウントされて、進行中のストリーミングと
+    // ローカルの messages が失われる (= 最初に送ったメッセージが消える).
+    // Chat の conversationId は内部で SSE の meta イベントから設定されるので、
+    // 後続メッセージは正しい conversation_id で送られる.
+    // 一覧から再選択された場合は handleSelectConversation で selectedId が更新される.
   }
 
   async function handleDelete(convId: string) {
