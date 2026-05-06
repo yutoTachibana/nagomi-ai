@@ -253,21 +253,21 @@ describe('getCrisisPrompt', () => {
     const result = checkCrisis('今夜死にたい');
     const prompt = getCrisisPrompt(result);
     expect(prompt).not.toBeNull();
-    expect(prompt).toContain('最重要');
+    expect(prompt).toContain('crisis_imminent');
     expect(prompt).toContain('0120-279-338');
-    expect(prompt).toContain('0570-783-556');
+    expect(prompt).toContain('lifelink.or.jp');
     expect(prompt).toContain('119');
   });
 
   it('imminent prompt forbids saying 大丈夫', () => {
     const result = checkCrisis('今日、自殺する');
     const prompt = getCrisisPrompt(result);
-    expect(prompt).toContain('「大丈夫」「気のせい」と否定すること');
+    expect(prompt).toContain('「大丈夫」「気のせい」と否定する');
   });
 
   it('concern prompt advises confirming current safety', () => {
     const result = checkCrisis('友達が死にたいと言っている');
     const prompt = getCrisisPrompt(result);
-    expect(prompt).toContain('本人の今の安全をやんわり確認する');
+    expect(prompt).toContain('本人の今の安全をやんわり 1 度だけ確認する');
   });
 });
