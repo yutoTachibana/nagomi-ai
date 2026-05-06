@@ -16,7 +16,7 @@ import {
 
 interface Medication {
   id: string;
-  name_encrypted: string;
+  nameEncrypted: string;
   _name?: string;
 }
 
@@ -57,7 +57,7 @@ export default function SideEffectsPage() {
       const decrypted = await Promise.all(
         meds.map(async (m) => ({
           ...m,
-          _name: (await decrypt(m.name_encrypted)) ?? '(名前を復号できません)',
+          _name: (await decrypt(m.nameEncrypted)) ?? '(名前を復号できません)',
         })),
       );
       setMedications(decrypted);

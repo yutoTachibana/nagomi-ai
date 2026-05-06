@@ -19,23 +19,23 @@ import {
 
 interface Medication {
   id: string;
-  name_encrypted: string;
+  nameEncrypted: string;
   dosage: string | null;
   schedule: { times: string[]; days: string[] } | null;
   active: boolean;
-  created_at: string;
+  createdAt: string;
   /** Client-side only: decrypted name */
   _name?: string;
 }
 
 interface MedicationLog {
   id: string;
-  medication_id: string;
+  medicationId: string;
   status: 'taken' | 'skipped' | 'missed';
-  scheduled_for: string;
-  taken_at: string | null;
-  note_encrypted: string | null;
-  created_at: string;
+  scheduledFor: string;
+  takenAt: string | null;
+  noteEncrypted: string | null;
+  createdAt: string;
 }
 
 type View = 'list' | 'add';
@@ -89,7 +89,7 @@ export function MedicationManager() {
       const decrypted = await Promise.all(
         meds.map(async (m) => ({
           ...m,
-          _name: (await decrypt(m.name_encrypted)) ?? '(名前を復号できません)',
+          _name: (await decrypt(m.nameEncrypted)) ?? '(名前を復号できません)',
         })),
       );
 
@@ -112,7 +112,7 @@ export function MedicationManager() {
   function todayLog(medicationId: string): MedicationLog | undefined {
     const today = todayDateString();
     return logs.find(
-      (l) => l.medication_id === medicationId && l.scheduled_for.startsWith(today),
+      (l) => l.medicationId === medicationId && l.scheduledFor.startsWith(today),
     );
   }
 
