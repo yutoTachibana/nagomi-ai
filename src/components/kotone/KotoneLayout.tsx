@@ -124,7 +124,7 @@ export function KotoneLayout({ conversations: initialConversations }: Props) {
   if (showList) {
     return (
       <div
-        className="flex flex-col bg-paper"
+        className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md flex flex-col bg-paper z-20"
         style={{ height: 'calc(100dvh - var(--nav-h))' }}
       >
         {/* ヘッダー */}
