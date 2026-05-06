@@ -58,15 +58,27 @@ export default function CrisisPage() {
                   <Clock size={12} />
                   <span>{r.available}</span>
                 </div>
-                <a
-                  href={`tel:${r.phone.replace(/-/g, '')}`}
-                  className="btn-primary mt-3 w-full text-body"
-                  style={r.id === 'emergency' ? { background: 'rgb(178, 92, 92)' } : undefined}
-                >
-                  <Phone size={16} />
-                  {r.phone}
-                </a>
-                {r.url ? (
+                {r.phone ? (
+                  <a
+                    href={`tel:${r.phone.replace(/-/g, '')}`}
+                    className="btn-primary mt-3 w-full text-body"
+                    style={r.id === 'emergency' ? { background: 'rgb(178, 92, 92)' } : undefined}
+                  >
+                    <Phone size={16} />
+                    {r.phone}
+                  </a>
+                ) : r.url ? (
+                  <a
+                    href={r.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary mt-3 w-full text-body"
+                  >
+                    <Globe size={16} />
+                    LINE で相談する
+                  </a>
+                ) : null}
+                {r.phone && r.url ? (
                   <a
                     href={r.url}
                     target="_blank"
