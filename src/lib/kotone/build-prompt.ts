@@ -18,16 +18,17 @@ const CATEGORY_LABELS: Record<string, string> = {
  * コンテキストは押しつけずに自然に活かすよう指示する.
  */
 export async function buildSystemPrompt(userId: string, crisisAddendum?: string | null): Promise<string> {
-  // Load user context
+  // Load user context (limit to 10 most recent items to prevent over-anchoring)
   const contextItems = await db.select({
     category: userContext.category,
     content: userContext.content,
   })
     .from(userContext)
     .where(eq(userContext.userId, userId))
-    .limit(50);
+    .orderBy(desc(userContext.createdAt))
+    .limit(10);
 
-  // Load recent conversation summaries (last 5)
+  // Load recent conversation summaries (last 3)
   const recentSummaries = await db.select({
     summary: conversations.summary,
     updatedAt: conversations.updatedAt,
@@ -35,7 +36,7 @@ export async function buildSystemPrompt(userId: string, crisisAddendum?: string 
     .from(conversations)
     .where(eq(conversations.userId, userId))
     .orderBy(desc(conversations.updatedAt))
-    .limit(5);
+    .limit(3);
 
   let prompt = KOTONE_SYSTEM_PROMPT;
 
@@ -77,7 +78,21 @@ export async function buildSystemPrompt(userId: string, crisisAddendum?: string 
     prompt += '</recent_conversation_summaries>\n';
   }
 
-  // Add crisis addendum if any
+  // Final reminder — placed at the end so it benefits from recency bias.
+  // 過去情報からの逸脱は最も多い失敗モードのため、最後に強く再注意する.
+  if (contextItems.length > 0 || summariesWithContent.length > 0) {
+    prompt += `\n<final_reminder>
+**最重要**: 上記の <user_context> や <recent_conversation_summaries> に書かれた話題 (特定の人物名、過去に話したテーマなど) は、利用者が **今このターンの発言で言及していない限り、こちらから持ち出してはいけません**.
+
+例えば、利用者が「週2、22時に配信してる」と答えたとき:
+- 正しい: 配信の頻度・時間帯について受け止めて続ける
+- 間違い: 「22時」「夜」から過去に登場した人物 (例: よるちゃん) を連想して話題にする ← 利用者は配信の話をしているのに、勝手に別の話題に飛んでいる
+
+「直前のターンで自分が何を聞いたか」「利用者の発言にどんな単語が含まれているか」だけを基に応答を組み立てます. user_context の情報は、利用者がそのトピックを **明示的に呼び出したとき** だけ参照します.
+</final_reminder>\n`;
+  }
+
+  // Add crisis addendum if any (placed last so crisis instructions win)
   if (crisisAddendum) {
     prompt += `\n\n${crisisAddendum}`;
   }
