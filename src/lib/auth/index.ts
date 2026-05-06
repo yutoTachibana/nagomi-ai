@@ -154,11 +154,57 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       }
       return true;
     },
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
         token.email = user.email;
       }
+
+      // Recovery: 過去のデータ消失で users から消えた user_id を持つ JWT に対し、
+      // 同じメールの user に sub を付け替えるか、それも無ければ token.sub で再作成する.
+      // 一度だけチェック (token.recovered フラグ).
+      if (token.sub && !token.recovered) {
+        try {
+          const [byId] = await db.select({ id: users.id })
+            .from(users)
+            .where(eq(users.id, token.sub as string))
+            .limit(1);
+
+          if (!byId) {
+            const email = (token.email as string | undefined) ?? null;
+            if (email) {
+              const [byEmail] = await db.select({ id: users.id })
+                .from(users)
+                .where(eq(users.email, email))
+                .limit(1);
+              if (byEmail) {
+                // 既存ユーザーに紐付け直す
+                token.sub = byEmail.id;
+              } else {
+                // 同じ user_id で再作成
+                await db.insert(users).values({
+                  id: token.sub as string,
+                  email,
+                  emailVerified: true,
+                });
+                await db.insert(profiles).values({ id: token.sub as string });
+              }
+            } else {
+              // メール無しの token (Twitter など): user_id で再作成
+              await db.insert(users).values({
+                id: token.sub as string,
+                email: `recovered_${token.sub}@oauth.local`,
+                emailVerified: false,
+              });
+              await db.insert(profiles).values({ id: token.sub as string });
+            }
+          }
+          token.recovered = true;
+        } catch (err) {
+          console.error('[auth] user recovery failed:', err);
+        }
+      }
+
       return token;
     },
     session({ session, token }) {
