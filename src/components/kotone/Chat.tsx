@@ -273,8 +273,8 @@ export function Chat({ conversationId: initialConvId, initialMessages = [], onCo
         )}
       </div>
 
-      {/* 入力エリア */}
-      <div className="border-t border-accent-soft bg-card/95 backdrop-blur-md px-3 py-3 pb-safe">
+      {/* 入力エリア (pb-safe は外す: ナビ側で safe-area を吸収しているため) */}
+      <div className="border-t border-accent-soft bg-card/95 backdrop-blur-md px-3 py-3">
         <div className="flex items-end gap-2">
           <textarea
             ref={textareaRef}
