@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Card, CardTitle } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 interface AppSettings {
   fontSize: 'small' | 'normal' | 'large';
@@ -24,6 +26,12 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [loaded, setLoaded] = useState(false);
 
+  // 表示名 (プロフィール)
+  const [displayName, setDisplayName] = useState<string>('');
+  const [originalName, setOriginalName] = useState<string>('');
+  const [savingName, setSavingName] = useState(false);
+  const [nameMessage, setNameMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -42,7 +50,53 @@ export default function SettingsPage() {
     }
   }, [settings, loaded]);
 
+  // プロフィールを取得して表示名を埋める
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/profile')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (cancelled || !data?.profile) return;
+        const name = data.profile.displayName ?? '';
+        setDisplayName(name);
+        setOriginalName(name);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  async function handleSaveName() {
+    const trimmed = displayName.trim();
+    if (!trimmed) {
+      setNameMessage({ type: 'error', text: '表示名を入力してください' });
+      return;
+    }
+    if (trimmed === originalName) {
+      return;
+    }
+    setSavingName(true);
+    setNameMessage(null);
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ display_name: trimmed }),
+      });
+      if (!res.ok) {
+        throw new Error('failed');
+      }
+      setOriginalName(trimmed);
+      setNameMessage({ type: 'success', text: '保存しました' });
+    } catch {
+      setNameMessage({ type: 'error', text: '保存できませんでした。もう一度お試しください' });
+    } finally {
+      setSavingName(false);
+    }
+  }
+
   if (!loaded) return null;
+
+  const nameChanged = displayName.trim() !== originalName && displayName.trim().length > 0;
 
   return (
     <div className="px-5 pt-safe pb-8 space-y-5">
@@ -53,6 +107,38 @@ export default function SettingsPage() {
         </Link>
         <h1 className="font-mincho text-h2">設定</h1>
       </header>
+
+      {/* Profile */}
+      <Card className="p-5 space-y-4">
+        <CardTitle>プロフィール</CardTitle>
+        <div className="space-y-3">
+          <Input
+            label="表示名"
+            type="text"
+            value={displayName}
+            onChange={(e) => {
+              setDisplayName(e.target.value);
+              setNameMessage(null);
+            }}
+            maxLength={40}
+            placeholder="ホーム画面で表示されます"
+          />
+          {nameMessage ? (
+            <p className={`text-small ${nameMessage.type === 'success' ? 'text-sage' : 'text-error'}`}>
+              {nameMessage.text}
+            </p>
+          ) : null}
+          <Button
+            type="button"
+            onClick={handleSaveName}
+            loading={savingName}
+            disabled={!nameChanged}
+            className="w-full"
+          >
+            保存する
+          </Button>
+        </div>
+      </Card>
 
       {/* Display */}
       <Card className="p-5 space-y-4">

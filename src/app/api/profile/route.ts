@@ -6,12 +6,31 @@ import { profiles } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 const Body = z.object({
-  display_name: z.string().nullable().optional(),
+  display_name: z.string().trim().min(1).max(40).nullable().optional(),
   diagnosis_self_report: z.array(z.string()).optional(),
   onboarding_completed: z.boolean().optional(),
   terms_accepted_version: z.string().nullable().optional(),
   terms_accepted_at: z.string().nullable().optional(),
 });
+
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ message: '認証が必要です' }, { status: 401 });
+  }
+
+  const [profile] = await db
+    .select({
+      displayName: profiles.displayName,
+      diagnosisSelfReport: profiles.diagnosisSelfReport,
+      onboardingCompleted: profiles.onboardingCompleted,
+    })
+    .from(profiles)
+    .where(eq(profiles.id, session.user.id))
+    .limit(1);
+
+  return NextResponse.json({ profile: profile ?? null });
+}
 
 export async function PATCH(req: Request) {
   const session = await auth();
