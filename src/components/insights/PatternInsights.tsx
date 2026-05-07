@@ -1,8 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Card, CardLabel } from '@/components/ui/Card';
 import { Sparkles } from 'lucide-react';
+import { estimateCycleLength, type CycleEntry } from '@/lib/cycle';
 
 type MoodEntry = {
   id: string;
@@ -13,13 +15,16 @@ type MoodEntry = {
 };
 
 interface Insight {
-  type: 'tag_low' | 'tag_high' | 'weekday' | 'trend_up' | 'trend_down';
+  type: 'tag_low' | 'tag_high' | 'weekday' | 'trend_up' | 'trend_down' | 'cycle_luteal_low';
   text: string;
+  /** 推奨の追加リンク (記事への誘導など) */
+  link?: { href: string; label: string };
 }
 
 const MIN_ENTRIES = 14;
 const MIN_TAG_COUNT = 4;
 const MIN_WEEKDAY_COUNT = 3;
+const MIN_LUTEAL_SAMPLES = 5; // 黄体期のサンプル最低数
 
 /**
  * 軽めのパターン気づきを 1-2 個だけ表示する.
@@ -29,7 +34,30 @@ const MIN_WEEKDAY_COUNT = 3;
  *  - 利用者を責めない / ネガティブ強調しすぎない
  */
 export function PatternInsights({ entries }: { entries: MoodEntry[] }) {
-  const insights = useMemo(() => computeInsights(entries), [entries]);
+  const [cycleEntries, setCycleEntries] = useState<CycleEntry[]>([]);
+
+  // サイクル機能が有効なら過去の周期を取得 (失敗・無効化時は空のまま)
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/cycle')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (cancelled || !data?.entries) return;
+        const list: CycleEntry[] = data.entries.map((e: { id: string; startDate: string; endDate: string | null }) => ({
+          id: e.id,
+          startDate: e.startDate,
+          endDate: e.endDate,
+        }));
+        setCycleEntries(list);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const insights = useMemo(
+    () => computeInsights(entries, cycleEntries),
+    [entries, cycleEntries],
+  );
 
   if (insights.length === 0) return null;
 
@@ -43,6 +71,14 @@ export function PatternInsights({ entries }: { entries: MoodEntry[] }) {
         {insights.map((it, i) => (
           <li key={i} className="text-body text-ink leading-relaxed">
             {it.text}
+            {it.link ? (
+              <>
+                <br />
+                <Link href={it.link.href} className="text-small text-terracotta underline">
+                  {it.link.label} →
+                </Link>
+              </>
+            ) : null}
           </li>
         ))}
       </ul>
@@ -53,11 +89,15 @@ export function PatternInsights({ entries }: { entries: MoodEntry[] }) {
   );
 }
 
-function computeInsights(entries: MoodEntry[]): Insight[] {
+function computeInsights(entries: MoodEntry[], cycleEntries: CycleEntry[] = []): Insight[] {
   if (entries.length < MIN_ENTRIES) return [];
 
   const overallAvg = avg(entries.map((e) => e.moodScore));
   const out: Insight[] = [];
+
+  // ----- 0. サイクル × 気分 (黄体期に下がる傾向) — 最優先で表示 -----
+  const cycleInsight = computeCycleInsight(entries, cycleEntries, overallAvg);
+  if (cycleInsight) out.push(cycleInsight);
 
   // ----- 1. タグ別気分平均 (最も差が大きいものを 1 個) -----
   const tagBuckets = new Map<string, number[]>();
@@ -150,4 +190,69 @@ function avg(arr: number[]): number {
 
 function weekdayLabel(day: number): string {
   return ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'][day] ?? '';
+}
+
+/**
+ * サイクル位相 × 気分の相関を計算する.
+ * - 黄体期 (生理前 14 日) の気分が、それ以外より明確に低ければ気づきとして提示.
+ * - PMS / PMDD の認識手がかりとして library 記事に誘導.
+ */
+function computeCycleInsight(
+  entries: MoodEntry[],
+  cycleEntries: CycleEntry[],
+  overallAvg: number,
+): Insight | null {
+  if (cycleEntries.length < 2) return null; // 周期長を推定できる最低限
+
+  const sortedCycles = [...cycleEntries].sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const cycleLength = estimateCycleLength(cycleEntries);
+
+  // 各 mood entry が「黄体期 / それ以外」のどちらに該当するか分類
+  const lutealScores: number[] = [];
+  const otherScores: number[] = [];
+
+  for (const m of entries) {
+    const moodDate = new Date(m.recordedAt);
+    const moodDateOnly = new Date(moodDate.getFullYear(), moodDate.getMonth(), moodDate.getDate());
+
+    // 直近の生理開始日 (mood entry より前) を探す
+    let lastStart: Date | null = null;
+    for (const c of sortedCycles) {
+      const d = new Date(c.startDate);
+      if (d <= moodDateOnly) lastStart = d;
+      else break;
+    }
+    if (!lastStart) continue;
+
+    const dayInCycle = Math.floor(
+      (moodDateOnly.getTime() - lastStart.getTime()) / (1000 * 60 * 60 * 24),
+    ) + 1;
+
+    if (dayInCycle > cycleLength + 7) continue; // 1 周期分以上経過は判定不能
+
+    // 黄体期: 排卵 (周期長 - 14) 以降〜次の生理開始まで
+    const ovulationDay = Math.max(1, cycleLength - 14);
+    if (dayInCycle > ovulationDay && dayInCycle <= cycleLength) {
+      lutealScores.push(m.moodScore);
+    } else {
+      otherScores.push(m.moodScore);
+    }
+  }
+
+  if (lutealScores.length < MIN_LUTEAL_SAMPLES || otherScores.length < MIN_LUTEAL_SAMPLES) {
+    return null;
+  }
+
+  const lutealMean = avg(lutealScores);
+  const otherMean = avg(otherScores);
+  const diff = lutealMean - otherMean;
+
+  // 黄体期が明確に低い (差 0.5 以上) ときだけ提示
+  if (diff > -0.5) return null;
+
+  return {
+    type: 'cycle_luteal_low',
+    text: `生理前 (黄体期) の気分が、それ以外の時期より低めの傾向があります (黄体期 ${lutealScores.length} 件 / それ以外 ${otherScores.length} 件). PMS / PMDD と言われる、ホルモンの揺らぎと関係しているかもしれません.`,
+    link: { href: '/library/pms-pmdd', label: '月経前のしんどさについて読む' },
+  };
 }

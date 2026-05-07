@@ -45,6 +45,14 @@ export const ARTICLES: Article[] = [
     category: 'くらし',
     readingTime: '5分',
   },
+  {
+    slug: 'pms-pmdd',
+    title: '月経前のしんどさ — PMS / PMDD',
+    description:
+      '気分の波が周期と重なるなら、それは「壊れた」のではなくホルモンの揺らぎかもしれません。',
+    category: 'からだ',
+    readingTime: '6分',
+  },
 ];
 
 export function getArticleBySlug(slug: string): Article | undefined {
