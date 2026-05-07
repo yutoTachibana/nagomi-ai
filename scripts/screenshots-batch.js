@@ -211,7 +211,7 @@ async function main() {
       ['adjustment-disorder', '22-library-adjustment'],
       ['bipolar-long-journey', '23-library-bipolar'],
       ['cognitive-distortions', '24-library-distortions'],
-      ['medication-thoughts', '25-library-medication'],
+      ['about-medication', '25-library-medication'],
     ];
     for (const [slug, name] of articles) {
       await page.goto(`${BASE}/library/${slug}`);
