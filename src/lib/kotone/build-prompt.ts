@@ -1,7 +1,8 @@
 import { db } from '@/lib/db';
-import { userContext, conversations } from '@/lib/db/schema';
+import { userContext, conversations, profiles, cycleEntries } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { KOTONE_SYSTEM_PROMPT } from '@/lib/claude/system-prompts';
+import { estimatePhase, phaseLabel, type CycleEntry } from '@/lib/cycle';
 
 const CATEGORY_LABELS: Record<string, string> = {
   background: '生活の背景',
@@ -38,6 +39,36 @@ export async function buildSystemPrompt(userId: string, crisisAddendum?: string 
     .orderBy(desc(conversations.updatedAt))
     .limit(3);
 
+  // サイクル機能が有効でデータがあれば、現在の位相をヒントとして渡す.
+  // 「利用者が話題にしたときだけ触れる」スタンスをプロンプトで明示.
+  let cyclePhaseHint: string | null = null;
+  try {
+    const [profile] = await db.select({ trackCycle: profiles.trackCycle })
+      .from(profiles)
+      .where(eq(profiles.id, userId))
+      .limit(1);
+    if (profile?.trackCycle) {
+      const rawCycles = await db.select({
+        id: cycleEntries.id,
+        startDate: cycleEntries.startDate,
+        endDate: cycleEntries.endDate,
+      })
+        .from(cycleEntries)
+        .where(eq(cycleEntries.userId, userId))
+        .orderBy(desc(cycleEntries.startDate))
+        .limit(6);
+      if (rawCycles.length > 0) {
+        const list: CycleEntry[] = rawCycles;
+        const phaseInfo = estimatePhase(list);
+        if (phaseInfo && phaseInfo.phase !== 'unknown') {
+          cyclePhaseHint = `${phaseLabel(phaseInfo.phase)} (周期 ${phaseInfo.dayInCycle} 日目, 推定 ${phaseInfo.cycleLength} 日周期)`;
+        }
+      }
+    }
+  } catch {
+    // 失敗してもチャットを止めない
+  }
+
   let prompt = KOTONE_SYSTEM_PROMPT;
 
   // Add user context section (wrapped in XML tag, treated as data not instructions)
@@ -64,6 +95,20 @@ export async function buildSystemPrompt(userId: string, crisisAddendum?: string 
       prompt += '\n';
     }
     prompt += '</user_context>\n';
+  }
+
+  // サイクル位相のヒント (opt-in 有効時のみ)
+  if (cyclePhaseHint) {
+    prompt += `\n\n<cycle_phase_hint>
+利用者は月経サイクルを記録しており、今日の推定位相は: **${cyclePhaseHint}** です.
+
+この情報は **利用者から月経・気分の波・体調の話題が出たときだけ** 参照してください.
+こちらから「今は黄体期ですね」と切り出してはいけません. プライベートな情報です.
+
+利用者が「最近イライラがひどい」「生理前かも」「気分の波が…」のような関連トピックに触れたとき、
+位相を踏まえて「もしかしたら生理前の影響もあるかもしれませんね」と **選択肢として** 添える程度に.
+押し付けは絶対にしない. 「ホルモンのせい」と利用者の感情を矮小化しない.
+</cycle_phase_hint>\n`;
   }
 
   // Add recent summaries (also wrapped)
