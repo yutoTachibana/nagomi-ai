@@ -57,10 +57,20 @@ if (process.env.AUTH_TWITTER_ID && process.env.AUTH_TWITTER_SECRET) {
 
 const useSecureCookies = process.env.AUTH_URL?.startsWith('https://') ?? false;
 
+const SESSION_MAX_AGE = 60 * 60 * 24 * 60; // 60 日 (iOS ITP 7日 cap への耐性)
+const SESSION_UPDATE_AGE = 60 * 60 * 24; // 24時間ごとに JWT を再発行
+
 export const { auth, signIn, signOut, handlers } = NextAuth({
   trustHost: true,
   providers,
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+    maxAge: SESSION_MAX_AGE,
+    updateAge: SESSION_UPDATE_AGE,
+  },
+  jwt: {
+    maxAge: SESSION_MAX_AGE,
+  },
   pages: { signIn: '/login' },
   cookies: {
     sessionToken: {
@@ -70,6 +80,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         sameSite: 'lax',
         path: '/',
         secure: useSecureCookies,
+        maxAge: SESSION_MAX_AGE,
       },
     },
     callbackUrl: {
