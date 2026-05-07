@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   diagnosis_self_report TEXT DEFAULT '[]',
   preferred_check_in_time TEXT,
   onboarding_completed INTEGER DEFAULT 0,
+  track_cycle INTEGER DEFAULT 0,
   terms_accepted_version TEXT,
   terms_accepted_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -211,8 +212,35 @@ CREATE TABLE IF NOT EXISTS medication_side_effects (
   recorded_at TEXT NOT NULL DEFAULT (datetime('now')),
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS cycle_entries (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  start_date TEXT NOT NULL,
+  end_date TEXT,
+  note_encrypted TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `;
 
 db.exec(tables);
+
+// 既存テーブルへの列追加 (CREATE TABLE IF NOT EXISTS では追加されないため).
+// 列が既にある場合は ALTER TABLE は失敗するので try で握りつぶす.
+function addColumnIfMissing(table, column, definition) {
+  try {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    console.log(`Added column ${table}.${column}`);
+  } catch (err) {
+    // duplicate column → 無視
+    if (!String(err.message).includes('duplicate column name')) {
+      console.warn(`ALTER TABLE ${table} ADD COLUMN ${column} failed:`, err.message);
+    }
+  }
+}
+
+addColumnIfMissing('profiles', 'track_cycle', 'INTEGER DEFAULT 0');
+
 db.close();
 console.log('DB initialized:', dbPath);

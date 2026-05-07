@@ -9,6 +9,7 @@ const Body = z.object({
   display_name: z.string().trim().min(1).max(40).nullable().optional(),
   diagnosis_self_report: z.array(z.string()).optional(),
   onboarding_completed: z.boolean().optional(),
+  track_cycle: z.boolean().optional(),
   terms_accepted_version: z.string().nullable().optional(),
   terms_accepted_at: z.string().nullable().optional(),
 });
@@ -24,6 +25,7 @@ export async function GET() {
       displayName: profiles.displayName,
       diagnosisSelfReport: profiles.diagnosisSelfReport,
       onboardingCompleted: profiles.onboardingCompleted,
+      trackCycle: profiles.trackCycle,
     })
     .from(profiles)
     .where(eq(profiles.id, session.user.id))
@@ -48,6 +50,7 @@ export async function PATCH(req: Request) {
   if (parsed.data.display_name !== undefined) updates.displayName = parsed.data.display_name;
   if (parsed.data.diagnosis_self_report !== undefined) updates.diagnosisSelfReport = parsed.data.diagnosis_self_report;
   if (parsed.data.onboarding_completed !== undefined) updates.onboardingCompleted = parsed.data.onboarding_completed;
+  if (parsed.data.track_cycle !== undefined) updates.trackCycle = parsed.data.track_cycle;
   if (parsed.data.terms_accepted_version !== undefined) updates.termsAcceptedVersion = parsed.data.terms_accepted_version;
   if (parsed.data.terms_accepted_at !== undefined) updates.termsAcceptedAt = parsed.data.terms_accepted_at;
 

@@ -8,6 +8,8 @@ import { eq, desc } from 'drizzle-orm';
 import { MoodChart } from '@/components/insights/MoodChart';
 import { TagSummary } from '@/components/insights/TagSummary';
 import { SleepSummary } from '@/components/insights/SleepSummary';
+import { CycleSummary } from '@/components/insights/CycleSummary';
+import { PatternInsights } from '@/components/insights/PatternInsights';
 
 export default async function InsightsPage() {
   const session = await auth();
@@ -45,7 +47,11 @@ export default async function InsightsPage() {
 
       <MoodChart entries={entries} />
 
+      <PatternInsights entries={entries} />
+
       <SleepSummary />
+
+      <CycleSummary />
 
       <TagSummary entries={entries} />
 

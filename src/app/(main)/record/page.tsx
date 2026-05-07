@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Card, CardLabel, CardTitle } from '@/components/ui/Card';
-import { Heart, Brain, BookOpen, Moon } from 'lucide-react';
+import { Heart, Brain, BookOpen, Moon, Flower2 } from 'lucide-react';
 
 export default function RecordIndex() {
   return (
@@ -75,6 +75,23 @@ export default function RecordIndex() {
               <CardTitle className="mt-1">眠った時間と感じ</CardTitle>
               <p className="mt-2 text-small text-muted">
                 気分の波を見るときに、睡眠のリズムが手がかりになります。
+              </p>
+            </div>
+          </div>
+        </Card>
+      </Link>
+
+      <Link href="/record/cycle" className="block">
+        <Card>
+          <div className="flex items-start gap-4">
+            <div className="rounded-full bg-plum/10 p-3">
+              <Flower2 size={22} strokeWidth={1.5} className="text-plum" />
+            </div>
+            <div className="flex-1">
+              <CardLabel>サイクルの記録 (任意)</CardLabel>
+              <CardTitle className="mt-1">月経サイクル</CardTitle>
+              <p className="mt-2 text-small text-muted">
+                気分の波の解釈に、サイクルの位置が手がかりになります。
               </p>
             </div>
           </div>

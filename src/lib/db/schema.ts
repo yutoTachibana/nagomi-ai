@@ -56,6 +56,8 @@ export const profiles = sqliteTable('profiles', {
   diagnosisSelfReport: text('diagnosis_self_report', { mode: 'json' }).$type<string[]>().$defaultFn(() => []),
   preferredCheckInTime: text('preferred_check_in_time'),
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' }).default(false),
+  /** 月経サイクル機能の opt-in. デフォルト false (押し付けない) */
+  trackCycle: integer('track_cycle', { mode: 'boolean' }).default(false),
   termsAcceptedVersion: text('terms_accepted_version'),
   termsAcceptedAt: text('terms_accepted_at'),
   createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
@@ -242,6 +244,22 @@ export const sleepEntries = sqliteTable('sleep_entries', {
   qualityScore: integer('quality_score'),
   noteEncrypted: text('note_encrypted'),
   createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ====================================================================
+// cycle_entries (月経サイクル. opt-in. profiles.trackCycle で表示制御)
+// ====================================================================
+export const cycleEntries = sqliteTable('cycle_entries', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
+  /** 開始日 (YYYY-MM-DD) */
+  startDate: text('start_date').notNull(),
+  /** 終了日 (YYYY-MM-DD). 入力中・継続中は null */
+  endDate: text('end_date'),
+  /** 自由メモ. 暗号化対象 */
+  noteEncrypted: text('note_encrypted'),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString()),
 });
 
 // ====================================================================
