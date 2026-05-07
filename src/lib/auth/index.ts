@@ -169,6 +169,8 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       if (user) {
         token.sub = user.id;
         token.email = user.email;
+        token.recovered = true; // 新規ログイン直後は users に確実に居る
+        token.invalid = false;
       }
 
       // Recovery: 過去のデータ消失で users から消えた user_id を持つ JWT に対し、
@@ -181,7 +183,9 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
             .where(eq(users.id, token.sub as string))
             .limit(1);
 
-          if (!byId) {
+          if (byId) {
+            token.recovered = true;
+          } else {
             const email = (token.email as string | undefined) ?? null;
             if (email) {
               const [byEmail] = await db.select({ id: users.id })
@@ -191,6 +195,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
               if (byEmail) {
                 // 既存ユーザーに紐付け直す
                 token.sub = byEmail.id;
+                token.recovered = true;
               } else {
                 // 同じ user_id で再作成
                 await db.insert(users).values({
@@ -199,6 +204,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                   emailVerified: true,
                 });
                 await db.insert(profiles).values({ id: token.sub as string });
+                token.recovered = true;
               }
             } else {
               // メール無しの token (Twitter など): user_id で再作成
@@ -208,21 +214,27 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
                 emailVerified: false,
               });
               await db.insert(profiles).values({ id: token.sub as string });
+              token.recovered = true;
             }
           }
-          token.recovered = true;
         } catch (err) {
-          console.error('[auth] user recovery failed:', err);
+          // リカバリ自体に失敗 (DB 制約違反など) → セッションを無効化してログインを促す
+          console.error('[auth] user recovery failed, invalidating session:', err);
+          token.invalid = true;
         }
       }
 
       return token;
     },
     session({ session, token }) {
-      if (token.sub) {
-        session.user.id = token.sub;
-        session.user.email = token.email as string;
+      // 無効な token (DB に user 不在 + リカバリ失敗) はセッションを返さない.
+      // クライアント側で sessionStatus が unauthenticated になり、
+      // middleware 経由で /login へリダイレクトされる.
+      if (token.invalid || !token.sub) {
+        return { ...session, user: undefined as never };
       }
+      session.user.id = token.sub;
+      session.user.email = token.email as string;
       return session;
     },
   },

@@ -18,17 +18,25 @@ export async function middleware(req: NextRequest) {
   const cookieName = useSecureCookies ? '__Secure-authjs.session-token' : 'authjs.session-token';
   const token = await getToken({ req, secret: process.env.AUTH_SECRET, cookieName });
 
-  if (!token && !isPublic) {
+  // token が無い、または invalid フラグ立ち (DB に user が居なくリカバリも失敗) は未認証扱い
+  const isAuthed = !!token && !token.invalid && !!token.sub;
+
+  if (!isAuthed && !isPublic) {
     if (path.startsWith('/api/')) {
       return NextResponse.json({ message: '認証が必要です' }, { status: 401 });
     }
     const url = req.nextUrl.clone();
     url.pathname = '/login';
     url.searchParams.set('next', path);
-    return NextResponse.redirect(url);
+    const res = NextResponse.redirect(url);
+    // 無効 cookie が残っているとループの原因になるので削除
+    if (token) {
+      res.cookies.delete(cookieName);
+    }
+    return res;
   }
 
-  if (token && isPublic) {
+  if (isAuthed && isPublic) {
     const url = req.nextUrl.clone();
     url.pathname = '/home';
     return NextResponse.redirect(url);
