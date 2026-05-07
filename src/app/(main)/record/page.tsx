@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Card, CardLabel, CardTitle } from '@/components/ui/Card';
-import { Heart, Brain, BookOpen, Moon, Flower2, ClipboardCheck } from 'lucide-react';
+import { Heart, Brain, BookOpen, Moon, Flower2, ClipboardCheck, Users } from 'lucide-react';
 
 export default function RecordIndex() {
   return (
@@ -109,6 +109,23 @@ export default function RecordIndex() {
               <CardTitle className="mt-1">PHQ-9 / GAD-7</CardTitle>
               <p className="mt-2 text-small text-muted">
                 月に 1 回ぐらい、いまの状態を自己評価. 主治医との共有に.
+              </p>
+            </div>
+          </div>
+        </Card>
+      </Link>
+
+      <Link href="/record/attachment" className="block">
+        <Card>
+          <div className="flex items-start gap-4">
+            <div className="rounded-full bg-plum/10 p-3">
+              <Users size={22} strokeWidth={1.5} className="text-plum" />
+            </div>
+            <div className="flex-1">
+              <CardLabel>愛着スタイル (リフレクション)</CardLabel>
+              <CardTitle className="mt-1">人との距離感を見つめる</CardTitle>
+              <p className="mt-2 text-small text-muted">
+                12 問で関係の中での自分のパターンを知る. 診断ではなく、気づきのため.
               </p>
             </div>
           </div>

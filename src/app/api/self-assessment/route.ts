@@ -5,10 +5,21 @@ import { db } from '@/lib/db';
 import { selfAssessments } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
-const Body = z.object({
-  scale_type: z.enum(['phq9', 'gad7']),
-  item_scores: z.array(z.number().int().min(0).max(3)).min(7).max(9),
-});
+// PHQ-9 / GAD-7 は 0-3 リッカート, ECR-S は 1-7 リッカート
+const Body = z.discriminatedUnion('scale_type', [
+  z.object({
+    scale_type: z.literal('phq9'),
+    item_scores: z.array(z.number().int().min(0).max(3)).length(9),
+  }),
+  z.object({
+    scale_type: z.literal('gad7'),
+    item_scores: z.array(z.number().int().min(0).max(3)).length(7),
+  }),
+  z.object({
+    scale_type: z.literal('ecrs'),
+    item_scores: z.array(z.number().int().min(1).max(7)).length(12),
+  }),
+]);
 
 export async function GET() {
   const session = await auth();
@@ -39,11 +50,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: '入力に誤りがあります' }, { status: 400 });
   }
 
-  const expectedLength = parsed.data.scale_type === 'phq9' ? 9 : 7;
-  if (parsed.data.item_scores.length !== expectedLength) {
-    return NextResponse.json({ message: 'スコア配列の長さが不正です' }, { status: 400 });
-  }
-
+  // total_score は ECR-S では参考値 (実際の解釈は 2 軸)
   const totalScore = parsed.data.item_scores.reduce((a, b) => a + b, 0);
 
   try {

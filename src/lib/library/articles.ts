@@ -53,6 +53,14 @@ export const ARTICLES: Article[] = [
     category: 'からだ',
     readingTime: '6分',
   },
+  {
+    slug: 'attachment-styles',
+    title: '愛着のスタイルと、こころの安心基地',
+    description:
+      '人との距離感や信頼の持ち方には、それぞれの傾向があります。「壊れた」のではなく、関係の中で身につけた形です。',
+    category: 'つながり',
+    readingTime: '8分',
+  },
 ];
 
 export function getArticleBySlug(slug: string): Article | undefined {
