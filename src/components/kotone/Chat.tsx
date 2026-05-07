@@ -175,16 +175,16 @@ export function Chat({ conversationId: initialConvId, initialMessages = [], onCo
       <header className="border-b border-accent-soft px-5 py-3 pt-safe">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-full bg-terracotta/15 flex items-center justify-center">
-            <span className="font-mincho text-terracotta">こ</span>
+            <span className="font-mincho text-terracotta">な</span>
           </div>
           <div className="flex-1">
-            <p className="font-mincho text-body">ことね</p>
+            <p className="font-mincho text-body">なごみ</p>
             <p className="text-kana text-muted">あなたの話を聞きます</p>
           </div>
           <Link
             href="/kotone/note"
             className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-accent-soft/40 transition-colors"
-            aria-label="ことねノート"
+            aria-label="なごみノート"
           >
             <BookOpen size={20} className="text-muted" />
           </Link>
@@ -211,7 +211,7 @@ export function Chat({ conversationId: initialConvId, initialMessages = [], onCo
       {messages.length === 0 ? (
         <div className="px-5 pt-4">
           <div className="rounded-card border border-accent-soft bg-card/60 p-4 text-small text-muted leading-relaxed">
-            ことねは AI です。診断や治療はできず、医師の代わりにはなれません。<br />
+            なごみは AI です。診断や治療はできず、医師の代わりにはなれません。<br />
             それでも、夜中でも話せる相手として、ここにいます。
           </div>
         </div>

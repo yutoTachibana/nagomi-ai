@@ -66,7 +66,7 @@ function LeafMotif() {
  * 3 ステップのオンボーディング.
  * 1. 名前 (任意. 呼びかけ用)
  * 2. 自己申告の状態 (任意. 「医療診断ではなく、自分の言葉で」)
- * 3. 約束ごと: ことねは AI、医療代替ではない、合わないときは離れて良い
+ * 3. 約束ごと: なごみは AI、医療代替ではない、合わないときは離れて良い
  */
 export default function OnboardingPage() {
   const router = useRouter();
@@ -218,7 +218,7 @@ export default function OnboardingPage() {
             <CardTitle>こもれびとの約束</CardTitle>
             <ul className="space-y-4 text-body leading-relaxed">
               <PromiseItem icon="check">
-                ことね (AI) は医師の代わりにはなれません。気になることは主治医に。
+                なごみ (AI) は医師の代わりにはなれません。気になることは主治医に。
               </PromiseItem>
               <div className="border-t border-accent-soft/40" />
               <PromiseItem icon="check">

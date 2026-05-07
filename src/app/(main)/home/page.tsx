@@ -120,7 +120,7 @@ export default async function HomePage() {
           <QuickAction
             href="/kotone"
             Icon={MessageCircleHeart}
-            label="ことねと話す"
+            label="なごみと話す"
             description="話を聞いてほしいとき"
           />
           <QuickAction

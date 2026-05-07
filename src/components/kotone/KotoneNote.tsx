@@ -164,7 +164,7 @@ export function KotoneNote() {
           >
             <ArrowLeft size={20} className="text-ink" />
           </Link>
-          <h1 className="font-mincho text-body flex-1">ことねノート</h1>
+          <h1 className="font-mincho text-body flex-1">なごみノート</h1>
         </div>
       </header>
 
@@ -172,7 +172,7 @@ export function KotoneNote() {
       <div className="flex-1 overflow-y-auto px-5 pt-4 pb-safe space-y-5">
         {/* Description */}
         <p className="text-small text-muted leading-relaxed">
-          ことねが会話の中から覚えたことです。
+          なごみが会話の中から覚えたことです。
           間違っていたり、覚えていてほしくないことは消せます。
         </p>
 
@@ -184,7 +184,7 @@ export function KotoneNote() {
           /* Empty state */
           <div className="py-12 text-center">
             <p className="text-body text-muted">
-              ことねはまだ何も覚えていません。
+              なごみはまだ何も覚えていません。
             </p>
             <p className="mt-2 text-small text-muted/70">
               会話を重ねるうちに、少しずつあなたのことを理解していきます。
@@ -255,7 +255,7 @@ export function KotoneNote() {
             <Textarea
               value={addContent}
               onChange={(e) => setAddContent(e.target.value)}
-              placeholder="ことねに覚えていてほしいことを書いてください"
+              placeholder="なごみに覚えていてほしいことを書いてください"
               rows={2}
               className="min-h-[72px]"
             />
@@ -303,7 +303,7 @@ export function KotoneNote() {
             {resetConfirm ? (
               <Card className="p-4 space-y-3 border-error/20">
                 <p className="text-body text-ink">
-                  ことねが覚えていることを全てリセットします。よろしいですか？
+                  なごみが覚えていることを全てリセットします。よろしいですか？
                 </p>
                 <div className="flex gap-3">
                   <Button

@@ -41,7 +41,7 @@ export async function extractContext(userId: string, conversationId: string) {
     // Build the extraction request
     const conversationText = msgs
       .reverse()
-      .map(m => `${m.role === 'user' ? '利用者' : 'ことね'}: ${m.content}`)
+      .map(m => `${m.role === 'user' ? '利用者' : 'なごみ'}: ${m.content}`)
       .join('\n\n');
 
     const prompt = `${CONTEXT_EXTRACTION_PROMPT}

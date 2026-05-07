@@ -120,7 +120,7 @@ export const mindfulnessSessions = sqliteTable('mindfulness_sessions', {
 });
 
 // ====================================================================
-// conversations & messages (ことねとのチャット)
+// conversations & messages (なごみとのチャット)
 // ====================================================================
 export const conversations = sqliteTable('conversations', {
   id: text('id').primaryKey().$defaultFn(() => randomUUID()),
@@ -133,7 +133,7 @@ export const conversations = sqliteTable('conversations', {
 });
 
 // ====================================================================
-// user_context (ことねノート - ユーザー理解コンテキスト)
+// user_context (なごみノート - ユーザー理解コンテキスト)
 // ====================================================================
 export const userContext = sqliteTable('user_context', {
   id: text('id').primaryKey().$defaultFn(() => randomUUID()),

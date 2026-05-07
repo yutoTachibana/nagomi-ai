@@ -18,7 +18,7 @@ export default function TermsPage() {
         <CardTitle>サービスの概要</CardTitle>
         <p className="mt-2 text-body text-muted leading-relaxed">
           こもれびは、日々の気分や考えを記録し、ご自身のペースで心の健康と向き合うためのアプリです。
-          AI アシスタント「ことね」との対話機能を含みますが、
+          AI アシスタント「なごみ」との対話機能を含みますが、
           これは医療行為の提供ではなく、あくまで自己理解を深めるための補助ツールです。
         </p>
       </Card>
@@ -49,7 +49,7 @@ export default function TermsPage() {
         <CardTitle>免責事項</CardTitle>
         <div className="mt-2 space-y-2 text-body text-muted leading-relaxed">
           <p>
-            AI アシスタント「ことね」の応答は医療アドバイスではありません。
+            AI アシスタント「なごみ」の応答は医療アドバイスではありません。
             診断、治療方針の決定、薬の変更などについては、必ず主治医や専門家にご相談ください。
           </p>
           <p>

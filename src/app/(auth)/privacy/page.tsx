@@ -35,7 +35,7 @@ export default function PrivacyPage() {
         <CardTitle>情報の利用目的</CardTitle>
         <ul className="mt-2 list-disc list-inside space-y-1 text-body text-muted leading-relaxed">
           <li>サービスの提供と改善</li>
-          <li>AI アシスタント「ことね」による応答の生成</li>
+          <li>AI アシスタント「なごみ」による応答の生成</li>
           <li>グラフや振り返りなど、ご自身の記録の表示</li>
           <li>サービスの安全性の維持</li>
         </ul>

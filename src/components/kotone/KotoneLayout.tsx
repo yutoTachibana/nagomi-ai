@@ -141,7 +141,7 @@ export function KotoneLayout({ conversations: initialConversations }: Props) {
             <Link
               href="/kotone/note"
               className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-accent-soft/40 transition-colors"
-              aria-label="ことねノート"
+              aria-label="なごみノート"
             >
               <BookOpen size={20} className="text-muted" />
             </Link>
@@ -170,7 +170,7 @@ export function KotoneLayout({ conversations: initialConversations }: Props) {
             <div className="py-12 text-center">
               <p className="text-body text-muted">まだ会話はありません</p>
               <p className="mt-2 text-small text-muted/70">
-                ことねに話しかけてみませんか
+                なごみに話しかけてみませんか
               </p>
             </div>
           ) : (

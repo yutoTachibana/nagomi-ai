@@ -14,7 +14,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 /**
  * ユーザーコンテキストと最近の会話要約を含むシステムプロンプトを構築する.
  *
- * ことねが「この人のことを覚えている」ように振る舞うための基盤.
+ * なごみが「この人のことを覚えている」ように振る舞うための基盤.
  * コンテキストは押しつけずに自然に活かすよう指示する.
  */
 export async function buildSystemPrompt(userId: string, crisisAddendum?: string | null): Promise<string> {
