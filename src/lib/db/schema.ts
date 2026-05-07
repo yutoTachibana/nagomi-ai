@@ -247,6 +247,22 @@ export const sleepEntries = sqliteTable('sleep_entries', {
 });
 
 // ====================================================================
+// self_assessments (PHQ-9 / GAD-7 など、標準化スケールのセルフチェック)
+// 診断ではなく自己モニタリング目的. 主治医に経過を見せるための記録.
+// ====================================================================
+export const selfAssessments = sqliteTable('self_assessments', {
+  id: text('id').primaryKey().$defaultFn(() => randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id),
+  /** 'phq9' | 'gad7' (将来 'wsas' 等を追加可) */
+  scaleType: text('scale_type').notNull(),
+  totalScore: integer('total_score').notNull(),
+  /** 各設問のスコア配列 [number, number, ...] */
+  itemScores: text('item_scores', { mode: 'json' }).$type<number[]>().notNull(),
+  completedAt: text('completed_at').notNull().$defaultFn(() => new Date().toISOString()),
+  createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
+});
+
+// ====================================================================
 // cycle_entries (月経サイクル. opt-in. profiles.trackCycle で表示制御)
 // ====================================================================
 export const cycleEntries = sqliteTable('cycle_entries', {

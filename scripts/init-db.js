@@ -222,6 +222,16 @@ CREATE TABLE IF NOT EXISTS cycle_entries (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+
+CREATE TABLE IF NOT EXISTS self_assessments (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  scale_type TEXT NOT NULL,
+  total_score INTEGER NOT NULL,
+  item_scores TEXT NOT NULL,
+  completed_at TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 `;
 
 db.exec(tables);

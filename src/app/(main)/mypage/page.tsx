@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Settings, Pill, Stethoscope, Bell, Lock, FileText, LogOut } from 'lucide-react';
+import { Settings, Pill, Stethoscope, Bell, Lock, FileText, LogOut, FileSpreadsheet } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -25,6 +25,7 @@ export default async function MyPage() {
         <ul className="divide-y divide-accent-soft">
           <MyPageItem href="/medication" Icon={Pill} label="服薬の記録" hint="お薬の管理" />
           <MyPageItem href="/mypage/visits" Icon={Stethoscope} label="通院の記録" hint="次回の予定など" />
+          <MyPageItem href="/mypage/report" Icon={FileSpreadsheet} label="主治医共有レポート" hint="診察前に印刷・PDF 保存" />
           <MyPageItem href="/mypage/notifications" Icon={Bell} label="通知設定" hint="お知らせのタイミング" />
           <MyPageItem href="/mypage/security" Icon={Lock} label="セキュリティ" hint="パスワードと暗号化" />
           <MyPageItem href="/mypage/data" Icon={FileText} label="データの管理" hint="エクスポート・削除" />
